@@ -1,9 +1,11 @@
+// Parent Component
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 
-function Home() {
+function Home({ cart, setCart }) {
   const [products, setProducts] = useState([]);
-  // useState lets us store product data in this componen
+  // useState lets us store product data in this component
+  // const [cart, setCart] = useState([]);  (later it moved to App.jsx for a reason and then passed here as props)
 
   useEffect(() => {
     // useEffect runs after the component mounts (like componentDidMount)
@@ -20,6 +22,11 @@ function Home() {
     fetchProducts();
   }, []); // empty dependency array = run only once after initial render
 
+  const handleAddToCart = (product) => {
+    setCart((prevCart) => [...prevCart, product]);
+    console.log("Cart:", [...cart, product]);
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Featured Products</h1>
@@ -30,6 +37,10 @@ function Home() {
             title={product.title}
             price={product.price}
             image={product.image}
+            onAddToCart={() =>
+              // console.log(`${product.title} added to cart`);
+              handleAddToCart(product)
+            }
           />
         ))}
       </div>
