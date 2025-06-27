@@ -1,18 +1,24 @@
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-import { Outlet } from "react-router-dom";
+import { Outlet, Routes, Route } from "react-router-dom";
 import { useState } from "react";
+import CartPage from "./pages/CartPage";
 
 function App() {
-  const [cart, setCart] = useState([]);
+  // const [cart, setCart] = useState([]);
   return (
     <div>
-      <Navbar cartCount={cart.length} />
-      <main className="p-4">
-        {/* <Outlet /> */}
+      {/* <Navbar cartCount={cart.length} /> */}
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/cart" element={<CartPage />} />
+      </Routes>
+      {/* <main className="p-4">
+        
         <Home cart={cart} setCart={setCart} />
-      </main>
+      </main> */}
       <Footer />
     </div>
   );

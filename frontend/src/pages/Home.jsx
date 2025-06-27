@@ -1,11 +1,13 @@
 // Parent Component
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import { useCart } from "../context/CartContext";
 
-function Home({ cart, setCart }) {
+function Home() {
   const [products, setProducts] = useState([]);
   // useState lets us store product data in this component
   // const [cart, setCart] = useState([]);  (later it moved to App.jsx for a reason and then passed here as props)
+  const { cart, setCart } = useCart();
 
   useEffect(() => {
     // useEffect runs after the component mounts (like componentDidMount)
@@ -31,18 +33,22 @@ function Home({ cart, setCart }) {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Featured Products</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            title={product.title}
-            price={product.price}
-            image={product.image}
-            onAddToCart={() =>
-              // console.log(`${product.title} added to cart`);
-              handleAddToCart(product)
-            }
-          />
-        ))}
+        {products.map((product) => {
+          const isInCart = cart.some((item) => item.id == product.id);
+          return (
+            <ProductCard
+              key={product.id}
+              title={product.title}
+              price={product.price}
+              image={product.image}
+              onAddToCart={() =>
+                // console.log(`${product.title} added to cart`);
+                handleAddToCart(product)
+              }
+              isInCart={isInCart}
+            />
+          );
+        })}
       </div>
     </div>
   );
