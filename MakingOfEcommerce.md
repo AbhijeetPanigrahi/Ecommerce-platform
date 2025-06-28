@@ -936,3 +936,528 @@ In `main.jsx` (entry point of app):
 So your `App.jsx` (and everything inside it like `Navbar`, `Home`, `CartPage`) is now **inside the Provider**.
 
 That’s what gives them access to the global cart state.
+
+## Best Use of Context in E-Commerce
+
+Here are **3 solid and common use cases**:
+
+| Feature                  | Description                                       | Benefits                                          |
+| ------------------------ | ------------------------------------------------- | ------------------------------------------------- |
+| 🔐 **Auth/User Context** | Store logged-in user info like name, token, email | Access user data across pages (Profile, Checkout) |
+| ❤️ **Wishlist Context**  | Store liked/saved products                        | Enable "Add to Wishlist" like Amazon              |
+| 🌙 **Theme Context**     | Light/dark mode or preferences                    | Easy UI toggle globally                           |
+
+## Implementing **User Context** (Authentication)
+
+Even before login form is built, we can:
+
+- Set up the Context
+- Simulate a login/logout state
+- Use it in Navbar to show user status or conditional buttons (like "Sign Out")
+
+---
+
+### ✅ Step-by-Step: Setup `UserContext`
+
+---
+
+### 🧩 1. Create `context/UserContext.js`
+
+```jsx
+import { createContext, useContext, useState } from "react";
+
+// Create context
+const UserContext = createContext();
+
+// Custom hook
+export const useUser = () => useContext(UserContext);
+
+// Provider
+export const UserProvider = ({ children }) => {
+  const [user, setUser] = useState(null); // null = not logged in
+
+  // Simulate login
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  // Simulate logout
+  const logout = () => {
+    setUser(null);
+  };
+
+  return (
+    <UserContext.Provider value={{ user, login, logout }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+```
+
+---
+
+### 🧩 2. Wrap `App` in `UserProvider` (in `main.jsx`)
+
+```jsx
+.....
+ReactDOM.createRoot(document.getElementById("root ..........
+    <UserProvider>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </UserProvider>
+```
+
+> ✅ Now your entire app can access user, login(), logout() from anywhere.
+
+---
+
+### 🧪 3. Update `Navbar.jsx` to Use `UserContext`
+
+This is where you **display the login status**:
+
+```jsx
+jsx
+CopyEdit
+import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
+import { Link } from "react-router-dom";
+
+function Navbar() {
+  const { cart } = useCart();
+  const { user, login, logout } = useUser();
+
+  return (
+    ......
+        {user ? (
+          <>
+            <span className="text-sm text-gray-300">👋 {user.name}</span>
+            <buttononClick={logout}
+              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <buttononClick={() => login({ name: "Abhijeet" })}
+            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded"
+          >
+            Login
+          </button>
+        )}
+      </div>......
+```
+
+## Protected Routes
+
+> ✅ Only logged-in users can access certain pages
+>
+> ❌ If not logged in, user is **redirected to homepage (or login page)**
+
+---
+
+## 🧱 Example Use Case
+
+- `/cart` → only accessible if user is logged in
+- If not logged in → redirect to `/`
+
+1. Create a `ProtectedRoute` component
+
+Inside `src/components/ProtectedRoute.jsx`:
+
+```jsx
+import { Navigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useUser();
+
+  if (!user) {
+    // Not logged in, redirect to homepage
+    return <Navigate to="/" replace />;
+  }
+
+  // Logged in → show the protected page
+  return children;
+};
+
+export default ProtectedRoute;
+```
+
+---
+
+### 🛠️ 2. Use `ProtectedRoute` in `App.jsx`
+
+Wrap any route you want to protect, like this:
+
+```jsx
+....
+import ProtectedRoute from "./components/ProtectedRoute";
+
+function App() {
+  return (.......
+       {/* Protected Route for Cart */}
+        <Routepath="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          } />     .......
+```
+
+Want to Redirect to the Login Page Instead?
+
+Just change this line in `ProtectedRoute.jsx`:
+
+```jsx
+return <Navigate to="/login" replace />;
+```
+
+> You can create a /login route later when you build forms.
+
+## Actual login and sign-up form
+
+### 📦 What We’ll Do
+
+### ✅ Features:
+
+- Tab-style toggle between **Login** and **Signup**
+- Form handling with `react-hook-form`
+- Simple validation (email, password, etc.)
+- On submit, call `login()` or `register()` from context
+- Prepped for backend API calls (currently mocked)
+
+---
+
+1️⃣ Install React Hook Form
+
+Run this in your terminal: npm install react-hook-form
+
+---
+
+2️⃣ Create `AuthPage.jsx` inside `src/pages/`
+
+```jsx
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useUser } from "../context/UserContext";
+
+function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const { login } = useUser();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  // Simulated backend-ready submit handler
+  const onSubmit = (data) => {
+    if (isLogin) {
+      // In future: call backend login API here
+      console.log("Logging in with:", data);
+      login({ name: data.email });
+    } else {
+      // In future: call backend signup API here
+      console.log("Registering with:", data);
+      login({ name: data.email }); // simulate auto-login after signup
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+      <div className="flex justify-between mb-6">
+        <buttonclassName={`w-1/2 py-2 ${isLogin ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setIsLogin(true)}
+        >
+          Login
+        </button>
+        <buttonclassName={`w-1/2 py-2 ${!isLogin ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setIsLogin(false)}
+        >
+          Signup
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium">Email</label>
+          <inputtype="email"
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+            {...register("email", { required: "Email is required" })}
+          />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Password</label>
+          <inputtype="password"
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+            {...register("password", {
+              required: "Password is required",
+              minLength: { value: 6, message: "At least 6 characters" },
+            })}
+          />
+          {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+        </div>
+
+        {!isLogin && (
+          <div>
+            <label className="block text-sm font-medium">Confirm Password</label>
+            <inputtype="password"
+              className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+              {...register("confirmPassword", {
+                required: "Confirm your password",
+              })}
+            />
+            {/* For backend password match logic later */}
+          </div>
+        )}
+
+        <buttontype="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
+          {isLogin ? "Login" : "Sign Up"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default AuthPage;
+```
+
+---
+
+3️⃣ Add Route in `App.jsx`
+
+```jsx
+import AuthPage from "./pages/AuthPage";
+<Route path="/auth" element={<AuthPage />} />;
+```
+
+---
+
+4️⃣ Update Navbar (optional): Add Login/Logout Button
+
+You're already doing this with `login()` and `logout()` — you can now change the login logic to redirect to `/auth` instead of mock login if you prefer:
+
+```jsx
+import { useNavigate } from "react-router-dom";
+// inside Navbar:
+const navigate = useNavigate();
+<button onClick={() => navigate("/auth")}>Login</button>;
+```
+
+---
+
+🛠️ Later, When the Backend is Ready
+
+Replace this: login({ name: data.email }); with:
+
+const response = await fetch("/api/login", { ... });
+const userData = await response.json();
+login(userData);
+
+---
+
+## 🧾 Full File: `AuthPage.jsx` — Explained Section by Section
+
+🔷 **1. Imports**
+
+```jsx
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useUser } from "../context/UserContext";
+```
+
+What do These Do?
+
+| Line        | Purpose                                                          |
+| ----------- | ---------------------------------------------------------------- |
+| `useState`  | Local toggle between Login and Signup                            |
+| `useForm`   | From `react-hook-form`, it handles all form inputs               |
+| `useUser()` | Custom hook to access `user`, `login()`, `logout()` from context |
+
+🔷 **2. Component Definition + States**
+
+```jsx
+function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true);
+```
+
+✅ `isLogin` State:
+
+- It controls **which form** is shown (login or signup)
+- If `isLogin === true` → Show Login form
+- If `isLogin === false` → Show Signup form
+
+```
+const { login } = useUser();
+```
+
+- This gives access to `login()` function from your `UserContext`
+- We will call this when form submits successfully
+
+---
+
+🔷 **3. Setup react-hook-form**
+
+```jsx
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm();
+```
+
+Explanation:
+
+| Hook/Value       | Purpose                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `register()`     | Connects inputs to the form state                              |
+| `handleSubmit()` | Wraps the form submit function                                 |
+| `errors`         | Object that holds validation errors (like "password required") |
+
+🔷 **4. `onSubmit` Function**
+
+```jsx
+const onSubmit = (data) => {
+  if (isLogin) {
+    console.log("Logging in with:", data);
+    login({ name: data.email });
+  } else {
+    console.log("Registering with:", data);
+    login({ name: data.email });
+  }
+};
+```
+
+- This function is called **when the form is submitted**
+- `data` is an object like: `{ email: "abc@mail.com", password: "123456" }`
+- Right now, it just logs data and calls `login()` to simulate login/signup
+- Later, you can replace it with **API calls**
+
+---
+
+🔷 **6. Toggle Buttons: Login ↔ Signup**
+
+```jsx
+<div className="flex justify-between mb-6">
+  <buttonclassName={`w-1/2 py-2 ${isLogin ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setIsLogin(true)}
+  >
+    Login
+  </button>
+  <buttonclassName={`w-1/2 py-2 ${!isLogin ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setIsLogin(false)}
+  >
+    Signup
+  </button>
+</div>
+```
+
+- These two buttons allow the user to **switch between login and signup**
+- `setIsLogin(true)` means: show Login
+- Button color changes based on active state
+
+---
+
+🔷 **7. The Actual Form**
+
+```jsx
+<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+```
+
+- `handleSubmit(onSubmit)` = When user submits the form → call `onSubmit(data)`
+- `register()` connects each field to `react-hook-form`
+
+---
+
+🔸 Email Field
+
+```jsx
+<input
+  type="email"
+  {...register("email", { required: "Email is required" })}
+/>;
+{
+  errors.email && <p>{errors.email.message}</p>;
+}
+```
+
+- Connected to the form as `email`
+- If left empty, it shows an error: `"Email is required"`
+
+---
+
+🔸 Password Field
+
+```jsx
+  type="password"
+  {...register("password", {
+    required: "Password is required",
+    minLength: { value: 6, message: "At least 6 characters" },
+  })}
+/>
+{errors.password && <p>{errors.password.message}</p>}
+```
+
+- Required + must be **at least 6 characters**
+- Shows error if invalid
+
+---
+
+🔸 Confirm Password (only in Signup mode)
+
+```jsx
+{!isLogin && (
+  <inputtype="password"
+    {...register("confirmPassword", {
+      required: "Confirm your password",
+    })}
+  />
+)}
+```
+
+- This input **only shows in signup mode**
+- Later, you can validate that it matches `password` using `watch()` or custom validation
+
+---
+
+🔷 **8. Submit Button**
+
+```jsx
+<button type="submit">{isLogin ? "Login" : "Sign Up"}</button>
+```
+
+- Shows different text depending on active mode
+- Clicking it submits the form and runs `onSubmit()`
+
+### After successful login/signup → navigate to homepage using React Router
+
+1️⃣ **Import the `useNavigate()` hook** from React Router DOM
+
+At the top of your `AuthPage.jsx`, add: import { useNavigate } from "react-router-dom";
+
+2️⃣ **Initialize `navigate`** inside your component Inside your `AuthPage()` function, add:
+
+const navigate = useNavigate();
+
+---
+
+3️⃣ **Use `navigate("/")` after login/signup,** Update your `onSubmit` like this:
+
+```jsx
+const onSubmit = (data) => {
+  if (isLogin) {
+    ....
+    navigate("/"); // ✅ redirect after login
+  } else {
+    .....
+    navigate("/"); // ✅ redirect after signup
+  }
+};
+```
+
+---
