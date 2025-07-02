@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -24,10 +27,21 @@ function Home() {
     fetchProducts();
   }, []); // empty dependency array = run only once after initial render
 
+  const navigate = useNavigate();
+  const { user } = useUser();
+
   const handleAddToCart = (product) => {
-    setCart((prevCart) => [...prevCart, product]);
-    console.log("Cart:", [...cart, product]);
+    // if user not logged in
+    if (!user) {
+      navigate("/auth"); // redirect to login/signup
+      return;
+    }
+    // if user logged in
+    setCart((prevCart) => [...prevCart, product]); // add product to cart normally
+    // console.log("Cart:", [...cart, product]);
   };
+
+  const { addToWishlist } = useWishlist();
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -46,6 +60,10 @@ function Home() {
                 handleAddToCart(product)
               }
               isInCart={isInCart}
+              onAddToWishlist={() => {
+                if (!user) return navigate("/auth");
+                addToWishlist(product);
+              }}
             />
           );
         })}

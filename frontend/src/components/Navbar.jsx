@@ -2,11 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
+import { useWishlist } from "../context/WishlistContext";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { cart } = useCart();
   const { user, login, logout } = useUser();
+  const { wishlist } = useWishlist();
   const navigate = useNavigate();
   return (
     <nav className="flex justify-between p-4 shadow bg-white">
@@ -14,12 +16,24 @@ const Navbar = () => {
         MyShop
       </Link>
       <div className="flex gap-4">
-        <Link to="/cart">
-          <p className="hover:underline">Cart</p>
-          <p className="bg-white text-black px-2 py-0.5 rounded">
-            {cart.length}
+        <Link
+          to="/cart"
+          className="relative flex items-center gap-1 hover:underline"
+        >
+          <span className="text-lg">🛒 Cart</span>
+          {cart.length > 0 && (
+            <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5">
+              {cart.length}
+            </span>
+          )}
+        </Link>
+        <Link to="/wishlist">
+          <p className="hover:underline">Wishlist</p>
+          <p className="bg-pink-500 text-white px-2 py-0.5 rounded text-sm text-center">
+            {wishlist.length}
           </p>
         </Link>
+
         {/* <Link to="/login">Login</Link> */}
         {user ? (
           <>

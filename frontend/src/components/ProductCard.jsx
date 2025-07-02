@@ -1,8 +1,16 @@
 // Child Component
 
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
-function ProductCard({ title, price, image, onAddToCart, isInCart }) {
+function ProductCard({
+  title,
+  price,
+  image,
+  onAddToCart,
+  isInCart,
+  onAddToWishlist,
+}) {
   const { cart, setCart } = useCart();
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
@@ -27,6 +35,12 @@ function ProductCard({ title, price, image, onAddToCart, isInCart }) {
             Add to Cart
           </button>
         )}
+        <button
+          className="bg-pink-500 text-white px-3 py-1 rounded hover:bg-pink-600"
+          onClick={onAddToWishlist}
+        >
+          ❤️ Wishlist
+        </button>
       </div>
     </div>
   );
