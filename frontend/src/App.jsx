@@ -19,6 +19,7 @@ const AuthPage = lazy(() => import("./pages/AuthPage"));
 const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const ThankYouPage = lazy(() => import("./pages/ThankYouPage"));
 const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const ProductPage = lazy(() => import("./pages/ProductPage"));
 
 function App() {
   // const [cart, setCart] = useState([]);
@@ -46,6 +47,7 @@ function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
         </Route>
         <Route path="/auth" element={<AuthPage />} />
       </Routes>

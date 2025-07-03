@@ -52,6 +52,7 @@ function Home() {
           return (
             <ProductCard
               key={product.id}
+              productId={product.id}
               title={product.title}
               price={product.price}
               image={product.image}

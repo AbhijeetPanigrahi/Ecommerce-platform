@@ -38,7 +38,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // ✅ Optional: Remove from cart logic
+  // ✅ Remove from cart logic
   const removeFromCart = (productId) => {
     const updated = cart.filter((item) => item.id !== productId);
     setCart(updated);
