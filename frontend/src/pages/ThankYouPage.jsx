@@ -1,4 +1,3 @@
-// src/pages/ThankYouPage.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -18,29 +17,31 @@ const ThankYouPage = () => {
   }, []);
 
   return (
-    <div className="max-w-xl mx-auto mt-20 text-center px-4">
-      <h1 className="text-3xl font-bold text-green-600 mb-4">
+    <div className="max-w-xl mx-auto mt-24 text-center px-6 bg-gradient-to-br from-[#FAFAFA] to-[#F0F0F0] p-8 rounded-3xl shadow-xl border border-gray-200">
+      <h1 className="text-3xl md:text-4xl font-extrabold text-green-600 mb-6">
         🎉 Thank You for Your Order!
       </h1>
 
-      <p className="text-lg text-gray-700 mb-3">
-        We’ve received your order <strong>{orderId}</strong> and it's being
-        processed.
+      <p className="text-lg text-gray-800 mb-4">
+        We’ve received your order{" "}
+        <span className="font-semibold text-[#20B2AA]">{orderId}</span> and it's
+        being processed.
       </p>
 
-      <p className="text-md text-gray-600 mb-3">
-        Estimated Delivery: <strong>{deliveryDate}</strong>
+      <p className="text-md text-gray-700 mb-3">
+        Estimated Delivery:{" "}
+        <span className="font-medium text-[#388E3C]">{deliveryDate}</span>
       </p>
 
-      <p className="text-md text-gray-600 mb-6">
+      <p className="text-sm text-gray-600 mb-8">
         A confirmation email has been sent to{" "}
-        <strong>yourname@example.com</strong>. You’ll receive tracking
-        information shortly.
+        <span className="font-semibold">yourname@example.com</span>. You’ll
+        receive tracking information shortly.
       </p>
 
       <Link
         to="/"
-        className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+        className="inline-block bg-[#20B2AA] hover:bg-[#199a96] text-white px-6 py-3 rounded-xl shadow-md transition font-medium"
       >
         Continue Shopping
       </Link>

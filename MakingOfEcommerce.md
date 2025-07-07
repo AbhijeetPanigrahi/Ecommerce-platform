@@ -1461,3 +1461,1214 @@ const onSubmit = (data) => {
 ```
 
 ---
+
+## SOME UX UPDATES
+
+| Feature                                            | UX Benefit                                                                  |
+| -------------------------------------------------- | --------------------------------------------------------------------------- |
+| 🛒 Redirecting to login when trying to add to cart | Prevents guest cart misuse, encourages account creation                     |
+| 🔐 Blocking cart view but showing a message        | Makes it clear why cart is empty (not a bug), builds trust                  |
+| 👤 Login/Signup prompt on cart page                | Smoothly encourages conversion from visitor → user                          |
+| ✅ Only authenticated users can build their cart   | Prevents session-related issues, enables future features (e.g. saving cart) |
+
+### ✅ Goal
+
+> If the user is not logged in and clicks the Add to Cart button →
+>
+> Redirect them to the `/auth` (login/signup) page.
+
+What We’ll Do
+
+| Step | Action                                                           |
+| ---- | ---------------------------------------------------------------- |
+| 1️⃣   | Access `user` from Context (to check login state)                |
+| 2️⃣   | If user is `null`, redirect to `/auth` instead of adding to cart |
+| 3️⃣   | If logged in, add product to cart normally                       |
+
+Files We’ll Edit
+
+- `Home.jsx` → where the products are rendered and `Add to Cart` is used
+
+Inside your `Home` component:
+
+✅ **After** (With Login Check + Redirect):
+
+```jsx
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+
+function Home() {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  const handleAddToCart = (product) => {
+    if (!user) {
+      // 🔐 Not logged in
+      navigate("/auth"); // redirect to login/signup
+      return;
+    }
+
+    // ✅ If logged in, add product to cart
+    setCart((prevCart) => [...prevCart, product]);
+  };
+
+  // ... rest of Home component
+}
+```
+
+## Feature: Wishlist
+
+Objective:
+
+Allow **logged-in users** to:
+
+- Add/remove items to their Wishlist
+- View them in a dedicated `/wishlist` page
+- Move wishlist items to cart
+
+---
+
+Step-by-Step Plan:
+
+| Step | Task                            | Description                                   |
+| ---- | ------------------------------- | --------------------------------------------- |
+| 1    | Setup Wishlist Context          | Manage wishlist globally across app           |
+| 2    | Add "Add to Wishlist ❤️" button | Let users add/remove wishlist items from Home |
+| 3    | Create Wishlist Page            | Show all wishlist products                    |
+| 4    | Integrate Routing               | Link to `/wishlist` via Navbar                |
+| 5    | (Optional) Move to Cart Button  | Allow 1-click move from wishlist to cart      |
+
+---
+
+### ✅ Step 1: Setup Wishlist Context
+
+### 📁 `src/context/WishlistContext.js`
+
+```jsx
+import React, { createContext, useContext, useState } from "react";
+
+// Create context
+const WishlistContext = createContext();
+
+// Create provider
+export const WishlistProvider = ({ children }) => {
+  const [wishlist, setWishlist] = useState([]);
+
+  const addToWishlist = (product) => {
+    if (!wishlist.find((item) => item.id === product.id)) {
+      setWishlist([...wishlist, product]);
+    }
+  };
+
+  const removeFromWishlist = (productId) => {
+    setWishlist(wishlist.filter((item) => item.id !== productId));
+  };
+
+  return (
+    <WishlistContext.Providervalue={{ wishlist, addToWishlist, removeFromWishlist }}
+    >
+      {children}
+    </WishlistContext.Provider>
+  );
+};
+
+// Custom hook
+export const useWishlist = () => useContext(WishlistContext);
+```
+
+### 🧠 Explanation:
+
+- We created a global **WishlistContext**.
+- `addToWishlist` checks if product already exists.
+- `removeFromWishlist` filters it out.
+- `useWishlist()` is a custom hook for easy access.
+
+### ✅ Step 2: Wrap App with `WishlistProvider`
+
+In `main.jsx` or your root-level entry file:
+
+```jsx
+import { WishlistProvider } from "./context/WishlistContext";
+......
+      <CartProvider>
+        <WishlistProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </WishlistProvider>
+      </CartProvider> .........
+```
+
+---
+
+### ✅ Step 3: Add "❤️ Wishlist" Button on Home Cards
+
+In `Home.jsx` (or ProductCard component):
+
+```jsx
+import { useWishlist } from "../context/WishlistContext";
+...........
+const { addToWishlist } = useWishlist();
+...........
+
+// Inside your product map loop:
+return (    <ProductCard
+              ......
+              onAddToWishlist={() => {
+                if (!user) return navigate("/auth");
+                addToWishlist(product);
+              }}
+            />
+          );
+
+```
+
+---
+
+### ✅ Step 4: Update Product Card
+
+### 📁 `src/components/ProductCard.jsx`
+
+```jsx
+// Child Component
+
+......
+import { useWishlist } from "../context/WishlistContext";
+
+function ProductCard({
+.....
+  onAddToWishlist,
+}) {
+  const { cart, setCart } = useCart();
+  return (
+    .....
+        <button
+          className="bg-pink-500 text-white px-3 py-1 rounded hover:bg-pink-600"
+          onClick={onAddToWishlist}
+        >
+          ❤️ Wishlist
+        </button>
+      </div>
+    </div>
+  );
+} .......
+```
+
+---
+
+### ✅ Step 5: Create the Wishlist Page
+
+### 📁 `src/pages/WishlistPage.jsx`
+
+```jsx
+jsx
+CopyEdit
+import React from "react";
+import { useWishlist } from "../context/WishlistContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+import { useCart } from "../context/CartContext";
+
+const WishlistPage = () => {
+  const { wishlist, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const user = useUser();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="text-center mt-8">
+        <h2 className="text-xl font-bold">Please log in to view your wishlist</h2>
+        <buttononClick={() => navigate("/auth")}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Login / Signup
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">💖 Your Wishlist</h1>
+
+      {wishlist.length === 0 ? (
+        <p className="text-gray-600">Your wishlist is empty.</p>
+      ) : (
+        <ul className="space-y-4">
+          {wishlist.map((item) => (
+            <likey={item.id}
+              className="border rounded p-4 flex justify-between items-center"
+            >
+              <div className="flex gap-4 items-center">
+                <img src={item.image} alt={item.title} className="h-20 w-20" />
+                <div>
+                  <h2 className="font-semibold">{item.title}</h2>
+                  <p className="text-gray-600">${item.price.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <buttonclassName="bg-green-600 text-white px-4 py-2 rounded"
+                  onClick={() => addToCart(item)}
+                >
+                  Add to Cart
+                </button>
+                <buttonclassName="bg-red-600 text-white px-4 py-2 rounded"
+                  onClick={() => removeFromWishlist(item.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default WishlistPage;
+
+```
+
+---
+
+### ✅ Step 5: Add Wishlist Route
+
+In `App.jsx`:
+
+```jsx
+import WishlistPage from "./pages/WishlistPage";
+
+<Route path="/wishlist" element={<WishlistPage />} />;
+```
+
+---
+
+### ✅ Step 6: Add Wishlist Link to Navbar
+
+In `Navbar.jsx`:
+
+```jsx
+<Link to="/wishlist">
+  <p className="hover:underline">Wishlist</p>
+  <p className="bg-pink-500 text-white px-2 py-0.5 rounded text-sm text-center">
+    {wishlist.length}
+  </p>
+</Link>
+```
+
+---
+
+### 🧠 Bonus Tips for Future:
+
+- You can later **persist the wishlist in backend or localStorage**.
+- Add a ❤️ toggle icon instead of a button.
+- Use animation (Framer Motion) for smoother UX.
+
+## Checkout Page
+
+### ✅ Step 1: Setup Checkout Page Route
+
+### 🧩 Goal:
+
+Create a new `/checkout` page that displays:
+
+- Cart summary
+- Total price
+- A simple address form (optional for now)
+- “Place Order” button
+
+---
+
+### 📁 Folder/File Structure
+
+Inside your `src/pages` folder, create a new file:
+
+---
+
+### 🧾 Step 2: Add Route in `App.jsx`
+
+Add this route: <Route path="/checkout" element={<CheckoutPage />} />
+
+Make sure this route is also **wrapped inside `ProtectedRoute`** like the cart page.
+
+---
+
+### 🧱 Step 3: Basic `CheckoutPage.jsx` Layout
+
+```jsx
+// src/pages/CheckoutPage.jsx
+import React from "react";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+
+const CheckoutPage = () => {
+  const { cart, setCart } = useCart();
+  const navigate = useNavigate();
+
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const handlePlaceOrder = () => {
+    alert("🎉 Order placed successfully!");
+    setCart([]); // Clear cart
+    navigate("/"); // Redirect to homepage
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">🧾 Checkout</h1>
+
+      <ul className="divide-y mb-4">
+        {cart.map((item) => (
+          <li key={item.id} className="py-3 flex justify-between items-center">
+            <span className="font-medium">{item.title}</span>
+            <span className="text-gray-600">${item.price.toFixed(2)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="text-right text-xl font-semibold">
+        Total: <span className="text-green-600">${totalPrice.toFixed(2)}</span>
+      </div>
+
+      <buttononClick={handlePlaceOrder}
+        className="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+      >
+        Place Order
+      </button>
+    </div>
+  );
+};
+
+export default CheckoutPage;
+```
+
+---
+
+### 🚀 Step 4: Link to Checkout from Cart Page
+
+In your `CartPage.jsx`, add a button to go to `/checkout`, below the total price:
+
+```jsx
+<Link
+  to="/checkout"
+  className="mt-4 inline-block bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+>
+  Proceed to Checkout →
+</Link>
+```
+
+---
+
+## Updated `CheckoutPage.jsx` with Shipping Address form
+
+**with `react-hook-form`**
+
+```jsx
+// src/pages/CheckoutPage.jsx
+import React from "react";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+
+const CheckoutPage = () => {
+  const { cart, setCart } = useCart();
+  const navigate = useNavigate();
+  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log("Shipping Data:", data);
+    alert("🎉 Order placed successfully!");
+    setCart([]);
+    navigate("/");
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">🧾 Checkout</h1>
+
+      {/* Cart Summary */}
+      <ul className="divide-y mb-6">
+        {cart.map((item) => (
+          <li key={item.id} className="py-3 flex justify-between items-center">
+            <span className="font-medium">{item.title}</span>
+            <span className="text-gray-600">${item.price.toFixed(2)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="text-right text-xl font-semibold mb-10">
+        Total: <span className="text-green-600">${totalPrice.toFixed(2)}</span>
+      </div>
+
+      {/* Shipping Form */}
+      <formonSubmit={handleSubmit(onSubmit)}
+        className="bg-gray-50 p-6 rounded shadow-md space-y-4"
+      >
+        <h2 className="text-xl font-semibold mb-4">📦 Shipping Information</h2>
+
+        <div>
+          <label className="block text-sm font-medium">Full Name</label>
+          <inputtype="text"
+            {...register("fullName", { required: "Full Name is required" })}
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+          />
+          {errors.fullName && (
+            <p className="text-red-500 text-sm">{errors.fullName.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Address</label>
+          <inputtype="text"
+            {...register("address", { required: "Address is required" })}
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+          />
+          {errors.address && (
+            <p className="text-red-500 text-sm">{errors.address.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">City</label>
+          <inputtype="text"
+            {...register("city", { required: "City is required" })}
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+          />
+          {errors.city && (
+            <p className="text-red-500 text-sm">{errors.city.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">ZIP Code</label>
+          <inputtype="text"
+            {...register("zip", {
+              required: "ZIP code is required",
+              pattern: {
+                value: /^[0-9]{5,6}$/,
+                message: "Enter a valid ZIP code",
+              },
+            })}
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+          />
+          {errors.zip && (
+            <p className="text-red-500 text-sm">{errors.zip.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Country</label>
+          <inputtype="text"
+            {...register("country", { required: "Country is required" })}
+            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+          />
+          {errors.country && (
+            <p className="text-red-500 text-sm">{errors.country.message}</p>
+          )}
+        </div>
+
+        <buttontype="submit"
+          className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 transition"
+        >
+          Place Order
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default CheckoutPage;
+```
+
+---
+
+### Explaination:
+
+### 3. The `input` element and React Hook Form Integration:
+
+- **`<input type="text" {...register("fullName", { required: "Full Name is required" })} className="w-full border border-gray-300 rounded px-3 py-2 mt-1" />`**
+- **Meaning:** This is the actual text input field where the user will type their full name. The crucial part here is how it's integrated with **React Hook Form (RHF)**.
+- **Concept & Syntax (`{...register(...)`):** This is where RHF works its magic.
+  - **`register` function:** This function is obtained from `useForm()` (e.g., `const { register } = useForm();`). Its job is to **"register"** this input field with React Hook Form. When an input is registered, RHF takes control of it for things like:
+    - **Value Management:** RHF efficiently manages the input's value without causing re-renders on every keystroke (unlike typical controlled components using `useState` for every input).
+    - **Validation:** It associates validation rules with this specific field.
+    - **Event Handling:** It automatically hooks up `onChange`, `onBlur`, etc., behind the scenes.
+  - **`"fullName"` (First Argument):** This is the **name** of the input field. This string will be the key used by RHF to store this field's value in the form data object when you submit the form (e.g., `formData.fullName`). It's also the key RHF uses to associate validation errors with this field (`errors.fullName`).
+  - **`{ required: "Full Name is required" }` (Second Argument):** This is an **optional object** containing **validation rules** for the `fullName` field.
+    - `required: "Full Name is required"`: This specific rule states that the `fullName` field is mandatory. If the user tries to submit the form and this field is empty, RHF will flag an error, and the specified string `"Full Name is required"` will become the error message for this field.
+  - **`...` (Spread Operator):** When `register("fullName", ...)` is called, it returns an object containing props like `name`, `ref`, `onChange`, `onBlur`, etc., that the HTML `<input>` element needs. The spread operator (`...`) takes all these properties from the returned object and applies them directly to the `<input>` tag. This is a concise way to connect the input to RHF without manually writing out all the props.
+- **Styling (`className`):**
+  - `w-full`: Sets the width to 100%.
+  - `border border-gray-300 rounded`: Adds a light gray border and rounded corners.
+  - `px-3 py-2 mt-1`: Adds horizontal padding (px-3), vertical padding (py-2), and top margin (mt-1).
+
+### 4. The Error Message Display:
+
+- **`{errors.fullName && (<p className="text-red-500 text-sm">{errors.fullName.message}</p>)}`**
+- **Meaning:** This line conditionally displays a validation error message if the `fullName` field has an error.
+- **Concept & Syntax:**
+  - **`errors` object:** This object is obtained from `useForm()` (e.g., `const { errors } = useForm();`). It stores all validation errors that occur in your form.
+  - **`errors.fullName`:** This property on the `errors` object will exist (and be "truthy") if there's a validation error specifically for the `fullName` field. If there's no error, `errors.fullName` will be `undefined` or `null` (which are "falsy").
+  - **`&&` (Logical AND Operator - Conditional Rendering):** This is a common pattern in React for conditionally rendering elements.
+    - If `errors.fullName` is `true` (i.e., an error exists), then the expression after `&&` (the `<p>` tag) will be rendered.
+    - If `errors.fullName` is `false` (i.e., no error), nothing will be rendered.
+  - **`<p className="text-red-500 text-sm">{errors.fullName.message}</p>`:**
+    - If an error exists, a paragraph tag (`<p>`) is rendered.
+    - `errors.fullName.message`: This accesses the specific error message string associated with the `fullName` field (e.g., "Full Name is required" from the `required` rule we set).
+
+## Thank you Page
+
+- **Create a `ThankYouPage.jsx`**
+- **Redirect the user to it after successful order submission**
+
+### Step 1: Create `ThankYouPage.jsx`
+
+```jsx
+// src/pages/ThankYouPage.jsx
+import React from "react";
+import { Link } from "react-router-dom";
+
+const ThankYouPage = () => {
+  return (
+    <div className="max-w-xl mx-auto mt-20 text-center px-4">
+      <h1 className="text-3xl font-bold text-green-600 mb-4">
+        🎉 Thank You for Your Order!
+      </h1>
+      <p className="text-lg text-gray-700 mb-6">
+        We've received your order and are preparing it for shipment.
+      </p>
+
+      <Linkto="/"
+        className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+      >
+        Continue Shopping
+      </Link>
+    </div>
+  );
+};
+
+export default ThankYouPage;
+```
+
+---
+
+### Step 2: Add the Route in `App.jsx`
+
+```jsx
+import ThankYouPage from "./pages/ThankYouPage";
+// Inside <Routes>:
+<Route path="/thank-you" element={<ThankYouPage />} />;
+```
+
+---
+
+### Step 3: Redirect to the Thank You Page in `CheckoutPage.jsx`
+
+Replace this in your `onSubmit` handler: navigate("/thank-you");
+
+Final `onSubmit` example:
+
+```jsx
+const onSubmit = (data) => {
+  console.log("Shipping Data:", data);
+  setCart([]);
+  navigate("/thank-you");
+};
+```
+
+---
+
+### Update Thank you page:
+
+- **Display a random order ID and delivery ETA**
+- **Show a fake email confirmation message**
+
+## Route Nesting
+
+### 🎯 Goal
+
+We want all shop-related pages like:
+
+- `/` (Home)
+- `/cart`
+- `/wishlist`
+
+…to share a common layout containing:
+
+- `Navbar` at the top
+- `Footer` at the bottom
+
+We’ll do this using **React Router’s nested routes**, which avoids repeating the same layout in every route.
+
+---
+
+### 🛠 Step-by-Step Implementation
+
+### ✅ 1. Create `ShopLayout.jsx`
+
+🔧 `src/layouts/ShopLayout.jsx`:
+
+```jsx
+import React from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { Outlet } from "react-router-dom";
+
+const ShopLayout = () => {
+  return (
+    <>
+      <Navbar />
+      <main className="p-4 min-h-[80vh]">
+        <Outlet />
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default ShopLayout;
+```
+
+### 🔍 Explanation:
+
+- ✅ `Navbar` and `Footer` are rendered **once**.
+- ✅ `<Outlet />` is a special React Router component that renders the **nested page** (like `Home`, `CartPage`, etc.).
+- ✅ `min-h-[80vh]` ensures the layout looks good even with little content.
+
+---
+
+### ✅ 2. Update `App.jsx` to Use Nested Routes
+
+```jsx
+import { Routes, Route } from "react-router-dom";
+import ShopLayout from "./layouts/ShopLayout";
+import Home from "./pages/Home";
+import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
+import AuthPage from "./pages/AuthPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+function App() {
+  return (
+    <Routes>
+      {/* All routes that use Navbar + Footer go here */}
+      <Route path="/" element={<ShopLayout />}>
+        <Route index element={<Home />} />
+        <Routepath="cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="wishlist" element={<WishlistPage />} />
+      </Route>
+
+      {/* Auth route doesn't show Navbar/Footer */}
+      <Route path="/auth" element={<AuthPage />} />
+    </Routes>
+  );
+}
+
+export default App;
+```
+
+### 🔍 Explanation:
+
+- 🔁 `path="/" element={<ShopLayout />}` acts like the _wrapper route_.
+- 📦 Inside it, nested routes are declared:
+  - `index` → `/` (Home)
+  - `cart` → `/cart` (protected)
+  - `wishlist` → `/wishlist`
+- 🚫 AuthPage is **outside** the layout so it doesn’t show `Navbar`/`Footer`.
+
+## Lazy Loading
+
+💡 What is Lazy Loading?
+
+---
+
+Lazy Loading = **loading components only when they are needed**, instead of loading everything at once during the initial page load.
+
+---
+
+### ❓Why Use Lazy Loading?
+
+Without lazy loading:
+
+- All components (`Home`, `CartPage`, `WishlistPage`, etc.) are bundled together.
+- Users **download everything up front**, even for routes they may never visit.
+
+With lazy loading:
+
+- Only the initial route (e.g., `/`) is loaded first.
+- Other components are **loaded on demand** — _only when user navigates to them_.
+
+---
+
+### 🚀 Benefits of Lazy Loading
+
+| 🚀 Benefit               | ✅ Why it helps                               |
+| ------------------------ | --------------------------------------------- |
+| Faster Initial Load      | Smaller bundle → quicker time-to-interactive  |
+| Efficient Code Splitting | Reduces memory usage and improves performance |
+| Better User Experience   | Pages feel faster, smoother navigation        |
+
+### ⚙️ How to Implement Lazy Loading in React Router?
+
+### ✅ 1. Import `lazy` and `Suspense` from React
+
+```jsx
+import React, { lazy, Suspense } from "react";
+```
+
+### ✅ 2. Use `lazy()` to import components dynamically
+
+```jsx
+const Home = lazy(() => import("./pages/Home"));
+const CartPage = lazy(() => import("./pages/CartPage"));
+const WishlistPage = lazy(() => import("./pages/WishlistPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+```
+
+### ✅ 3. Wrap lazy routes inside `<Suspense fallback={...}>`
+
+Now update your `App.jsx`:
+
+```jsx
+import { Routes, Route } from "react-router-dom";
+import ShopLayout from "./layouts/ShopLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { lazy, Suspense } from "react";
+
+// Lazily loaded pages
+const Home = lazy(() => import("./pages/Home"));
+const CartPage = lazy(() => import("./pages/CartPage"));
+const WishlistPage = lazy(() => import("./pages/WishlistPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+
+function App() {
+  return (
+    <Suspense
+      fallback={<div className="text-center mt-20 text-xl">Loading...</div>}
+    >
+      <Routes>
+        <Route path="/" element={<ShopLayout />}>
+          <Route index element={<Home />} />
+          <Route
+            path="cart"
+            element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="wishlist" element={<WishlistPage />} />
+        </Route>
+        <Route path="/auth" element={<AuthPage />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
+export default App;
+```
+
+---
+
+### 🔍 Explanation
+
+- `lazy(() => import(...))` tells React to **load this component only when needed**.
+- `<Suspense fallback={...}>` displays a **temporary loading message** while the component loads.
+- This works great with **code-splitting** enabled by default in React apps created via Vite, CRA, etc.
+
+---
+
+## Product Details Page
+
+### ✅ GOAL:
+
+When a user clicks on a product title or image from the `Home` page, they'll be navigated to `/product/:id`, and you'll show the full product details using `useParams`.
+
+---
+
+### 🧱 1. **Create a New Component: `ProductPage.jsx`**
+
+```jsx
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+const ProductPage = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      const res = await fetch(`https://fakestoreapi.com/products/${id}`);
+      const data = await res.json();
+      setProduct(data);
+    }
+    fetchProduct();
+  }, [id]);
+
+  if (!product) return <p className="text-center mt-10">Loading product...</p>;
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
+      <img
+        src={product.image}
+        alt={product.title}
+        className="w-40 h-40 object-contain mb-4"
+      />
+      <p className="text-lg text-gray-700 mb-2">${product.price}</p>
+      <p className="text-gray-600">{product.description}</p>
+    </div>
+  );
+};
+
+export default ProductPage;
+```
+
+---
+
+### 🛣️ 2. **Update Your Routing (in `App.jsx`)**
+
+Add this line to your `Routes` inside `App.jsx`:
+
+```jsx
+import ProductPage from "./pages/ProductPage";
+<Route path="/product/:id" element={<ProductPage />} />;
+```
+
+Now the route `/product/3` will render `ProductPage.jsx` and display product details for `id = 3`.
+
+---
+
+### 🔗 3. **Link to Product Details from Home Page in ProductCard.jsx**
+
+```jsx
+// Child Component
+
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { Link } from "react-router-dom";
+function ProductCard({
+  productId,
+  title,
+  price,
+  image,
+  onAddToCart,
+  isInCart,
+  onAddToWishlist,
+}) {
+  const { cart, setCart } = useCart();
+  return (
+    <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
+      <Link to={`/product/${productId}`}>
+        <img src={image} alt={title} className="h-56 w-full object-cover" />
+      </Link>
+
+      <div className="p-4">
+        {/* 📝 Title now links to Product Details */}
+        <Link to={`/product/${productId}`}>
+          <h2 className="text-lg font-semibold text-gray-800 hover:underline truncate">
+            {title}
+          </h2>
+        </Link>
+......
+```
+
+---
+
+### Update Usage in `Home.jsx`
+
+<ProductCard
+key={[product.id](http://product.id/)}
+productId={[product.id](http://product.id/)}
+…..>
+
+## ✅ Done!
+
+Now, when someone clicks on a product image or title, they’ll be navigated to `/product/:id`, and React will:
+
+- Use `useParams` to get the ID.
+- Fetch that product’s details.
+- Show a fully detailed product view.
+
+---
+
+### 🧠 Why `useParams` is useful?
+
+- Avoids having to pass product data manually across pages.
+- Keeps URL meaningful (`/product/7` instead of `/product?id=7`).
+- Helps with browser navigation (back/forward, bookmarks).
+
+## Update Product Page (”Add to Cart” and “Wishlist” button)
+
+What We'll Do:
+
+1. Use `useCart()` and `useWishlist()` to get access to their respective functions.
+2. Add buttons below the product description.
+3. Check if the product is already in cart or wishlist (optional UX improvement).
+4. Redirect unauthenticated users to `/auth`.
+
+---
+
+`ProductPage.jsx`
+
+```jsx
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useUser } from "../context/UserContext";
+
+const ProductPage = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const { cart, setCart } = useCart();
+  const { addToWishlist } = useWishlist();
+  const { user } = useUser();
+  const navigate = useNavigate();
+.....
+  // Handler: Add to cart
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setCart((prev) => [...prev, product]);
+  };
+
+  // Handler: Add to wishlist
+  const handleAddToWishlist = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    addToWishlist(product);
+  };
+
+  if (!product) return <p className="text-center mt-10">Loading product...</p>;
+
+  const isInCart = cart.some((item) => item.id == product.id);
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      .....
+      {/* Buttons */}
+      <div className="flex gap-4">
+        {isInCart ? (
+          <button className="bg-green-600 text-white px-6 py-2 rounded" disabled>
+            ✅ Already in Cart
+          </button>
+        ) : (
+          <buttononClick={handleAddToCart}
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          >
+            Add to Cart
+          </button>
+        )}
+        <buttononClick={handleAddToWishlist}
+          className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-600"
+        >
+          ❤️ Wishlist
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ProductPage;
+```
+
+---
+
+## Filter and Search-Bar Feature (`useSearchParams`)
+
+### 🧠 What is `useSearchParams`?
+
+It’s a React Router hook that allows you to **read and update query parameters** in the URL. It’s super useful when you want to:
+
+- Add **filters** (e.g., category, price range)
+- Add **sort options** (e.g., low-to-high, A-Z)
+- Add **search** functionality
+
+> Example: /products?category=electronics&sort=price
+
+You can implement this in your `Home.jsx` or a new `/products` page.
+
+### Implement `useSearchParams` in 3 Steps:
+
+**Step 1: Update the `Home.jsx` to include a category filter**
+
+- Add a dropdown or button group for categories like _men’s clothing, electronics, etc._
+- On change, update the URL using `useSearchParams`
+
+**Step 2: Read the search param and filter displayed products**
+
+Step 3: Bonus – Add search input or price filter via searchParams
+
+### 🔹 **Step 1: Import the Hook**
+
+At the top of `Home.jsx`: import { useSearchParams } from "react-router-dom";
+
+### 🔹 **Step 2: Add `useSearchParams` Hook**
+
+Add this inside your `Home()` component:
+
+```
+const [searchParams, setSearchParams] = useSearchParams();
+const selectedCategory = searchParams.get("category");
+```
+
+---
+
+### 🔹 **Step 3: Create Category Filter UI**
+
+Just above the product grid, add a set of filter buttons or a dropdown:
+
+```jsx
+const categories = ["all", "men's clothing", "jewelery", "electronics", "women's clothing"];
+
+return (
+  <div className="max-w-6xl mx-auto px-4 py-8">
+    <h1 className="text-2xl font-bold mb-6">Featured Products</h1>
+
+    {/* Filter Buttons */}
+    <div className="flex gap-2 mb-6 flex-wrap">
+      {categories.map((cat) => (
+        <buttonkey={cat}
+          className={`px-3 py-1 border rounded ${
+            selectedCategory === cat || (cat === "all" && !selectedCategory)
+              ? "bg-blue-600 text-white"
+              : "bg-white text-gray-700"
+          }`}
+          onClick={() => {
+            if (cat === "all") {
+              searchParams.delete("category");
+              setSearchParams(searchParams);
+            } else {
+              setSearchParams({ category: cat });
+            }
+          }}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+```
+
+---
+
+### 🔹 **Step 4: Filter Products Based on Category**
+
+Modify the product rendering logic:
+
+```jsx
+const filteredProducts = selectedCategory
+  ? products.filter((p) => p.category === selectedCategory)
+  : products;
+```
+
+Replace `products.map(...)` with:
+
+```jsx
+filteredProducts.map((product) => (
+  // Your existing ProductCard code   ))
+```
+
+### Search Bar
+
+1. Add a controlled search input.
+2. Store the search term in the URL using `useSearchParams`.
+3. Filter `products` based on the search term.
+4. Combine with existing **category filtering**.
+
+### 1. Add the search input box
+
+Above the category filter, we’ll place a search bar.
+
+### 2. Track the search query using `useSearchParams`
+
+This keeps the state in the URL (great for bookmarking & sharing).
+
+### 3. Filter products using:
+
+```jsx
+product.title.toLowerCase().includes(searchTerm.toLowerCase());
+```
+
+---
+
+### ✅ Updated `Home.jsx` (relevant part only)
+
+Update your `Home.jsx` like this:
+
+```jsx
+// Add with existing imports
+import { useSearchParams } from "react-router-dom";
+
+function Home() {
+......
+
+  // 🚀 React Router Search Params
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category");
+  const searchTerm = searchParams.get("search") || "";
+
+  // 🔎 Filtered by category
+  const categoryFiltered = selectedCategory
+    ? products.filter((p) => p.category === selectedCategory)
+    : products;
+
+  // 🔍 Filtered by search input
+  const finalFiltered = categoryFiltered.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // ✏️ Handle Search Input
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    if (value) {
+      searchParams.set("search", value);
+    } else {
+      searchParams.delete("search");
+    }
+    setSearchParams(searchParams);
+  };
+
+  ...
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Featured Products</h1>
+
+      {/* 🔍 Search Bar */}
+      <inputtype="text"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        placeholder="Search products..."
+        className="mb-4 px-3 py-2 border border-gray-300 rounded w-full"
+      />
+
+      {/* 🧩 Category Filters */}
+......
+
+      {/* 💥 Product Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {finalFiltered.map((product) => {
+          .....
+```
+
+## Added Infinite Scroll Feature ( used useRef and useCallback )

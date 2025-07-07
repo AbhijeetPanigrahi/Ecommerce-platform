@@ -1,4 +1,4 @@
-// src/pages/AuthPage.jsx
+// Modernized AuthPage.jsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useUser } from "../context/UserContext";
@@ -19,99 +19,125 @@ function AuthPage() {
   const onSubmit = (data) => {
     if (isLogin) {
       // In future: call backend login API here
-      console.log("Logging in with:", data);
-      login({ name: data.email });
-      navigate("/");
+      // console.log("Logging in with:", data);
+      login({ name: "User", email: data.email }); // no name during login
     } else {
       // In future: call backend signup API here
-      console.log("Registering with:", data);
-      login({ name: data.email }); // simulate auto-login after signup
-      navigate("/");
+      // console.log("Registering with:", data);
+      login({ name: data.name, email: data.email }); // get name from signup form
     }
+    navigate("/");
   };
 
   // This keeps track of whatever the user types in the "password" input.
   const password = watch("password");
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-2xl">
-      <div className="flex justify-between mb-6">
-        <button
-          className={`w-1/2 py-2 ${
-            isLogin ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setIsLogin(true)}
-        >
-          Login
-        </button>
-        <button
-          className={`w-1/2 py-2 ${
-            !isLogin ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setIsLogin(false)}
-        >
-          Signup
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-            {...register("email", { required: "Email is required" })}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] px-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <button
+            onClick={() => setIsLogin(true)}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium transition shadow-sm ${
+              isLogin ? "bg-[#20B2AA] text-white" : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setIsLogin(false)}
+            className={`flex-1 py-2 rounded-xl text-sm font-medium transition shadow-sm ${
+              !isLogin ? "bg-[#20B2AA] text-white" : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            Sign Up
+          </button>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-            {...register("password", {
-              required: "Password is required",
-              minLength: { value: 6, message: "At least 6 characters" },
-            })}
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                {...register("name", { required: "Name is required" })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
           )}
-        </div>
 
-        {!isLogin && (
           <div>
-            <label className="block text-sm font-medium">
-              Confirm Password
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              {...register("email", { required: "Email is required" })}
+              className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
             </label>
             <input
               type="password"
-              className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-              {...register("confirmPassword", {
-                required: "Confirm your password",
-                validate: (value) =>
-                  value === password || "Password do not match",
+              {...register("password", {
+                required: "Password is required",
+                minLength: { value: 6, message: "At least 6 characters" },
               })}
+              className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm">
-                {errors.confirmPassword.message}
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password.message}
               </p>
             )}
-            {/* For backend password match logic later */}
           </div>
-        )}
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          {isLogin ? "Login" : "Sign Up"}
-        </button>
-      </form>
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                {...register("confirmPassword", {
+                  required: "Confirm your password",
+                  validate: (value) =>
+                    value === password || "Passwords do not match",
+                })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
+              />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="w-full bg-[#20B2AA] hover:bg-[#199a96] text-white py-2 rounded-xl font-medium transition"
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,60 +1,13 @@
-// import React from "react";
-// import { useCart } from "../context/CartContext";
-// import { useNavigate } from "react-router-dom";
-
-// const CheckoutPage = () => {
-//   const { cart, setCart } = useCart();
-//   const navigate = useNavigate();
-
-//   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
-
-//   const handlePlaceOrder = () => {
-//     alert("🎉 Order placed successfully!");
-//     setCart([]); // clear cart
-//     navigate("/"); // redirect to home page
-//     console.log("Shipping data: ", data);
-//   };
-
-// //   const onSubmit = (data) => {
-// //     console.log("Shipping data: " ,data)
-// //   }
-//   return (
-//     <div className="max-w-4xl mx-auto p-6">
-//       <h1 className="text-2xl font-bold mb-6">🧾 Checkout</h1>
-
-//       <ul className="divide-y mb-4">
-//         {cart.map((item) => (
-//           <li key={item.id} className="py-3 flex justify-between items-center">
-//             <span className="font-medium">{item.title}</span>
-//             <span className="text-gray-600">${item.price.toFixed(2)}</span>
-//           </li>
-//         ))}
-//       </ul>
-
-//       <div className="text-right text-xl font-semibold">
-//         Total: <span className="text-green-600">${totalPrice.toFixed(2)}</span>
-//       </div>
-
-//       <button
-//         onClick={handlePlaceOrder}
-//         className="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-//       >
-//         Place Order
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default CheckoutPage;
-
 // src/pages/CheckoutPage.jsx
 import React from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useUser } from "../context/UserContext";
 
 const CheckoutPage = () => {
   const { cart, setCart } = useCart();
+  const { user } = useUser();
   const navigate = useNavigate();
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
@@ -64,107 +17,157 @@ const CheckoutPage = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Shipping Data:", data);
-    alert("🎉 Order placed successfully!");
-    setCart([]);
+  // 🔄 Order Status Generator
+  const getRandomStatus = () => {
+    const statuses = ["Processing", "Shipped", "Delivered"];
+    const randomIndex = Math.floor(Math.random() * statuses.length);
+    return statuses[randomIndex];
+  };
+
+  const onSubmit = (formData) => {
+    const newOrder = {
+      id: Date.now(),
+      items: cart,
+      total: totalPrice,
+      date: new Date().toLocaleString(),
+      userEmail: user?.name,
+      shipping: formData,
+      status: getRandomStatus(),
+    };
+
+    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    const updatedOrders = [...existingOrders, newOrder];
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    setCart([]); // Clear cart
     navigate("/thank-you");
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">🧾 Checkout</h1>
+    <div className="max-w-5xl mx-auto p-8 bg-[#FAFAFA] rounded-2xl shadow-md mt-10">
+      <h1 className="text-3xl font-semibold text-[#212121] mb-8">
+        🧾 Checkout
+      </h1>
 
-      {/* Cart Summary */}
-      <ul className="divide-y mb-6">
-        {cart.map((item) => (
-          <li key={item.id} className="py-3 flex justify-between items-center">
-            <span className="font-medium">{item.title}</span>
-            <span className="text-gray-600">${item.price.toFixed(2)}</span>
-          </li>
-        ))}
-      </ul>
-
-      <div className="text-right text-xl font-semibold mb-10">
-        Total: <span className="text-green-600">${totalPrice.toFixed(2)}</span>
+      {/* 🛒 Cart Summary */}
+      <div className="bg-white rounded-xl p-6 shadow-sm mb-10">
+        <ul className="divide-y divide-gray-200">
+          {cart.map((item) => (
+            <li
+              key={item.id}
+              className="py-4 flex justify-between items-center"
+            >
+              <span className="font-medium text-gray-800 truncate w-3/4">
+                {item.title}
+              </span>
+              <span className="text-[#20B2AA] font-semibold">
+                ${item.price.toFixed(2)}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="text-right text-xl font-semibold mt-4">
+          Total:{" "}
+          <span className="text-green-600">${totalPrice.toFixed(2)}</span>
+        </div>
       </div>
 
-      {/* Shipping Form */}
+      {/* 📦 Shipping Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-gray-50 p-6 rounded shadow-md space-y-4"
+        className="bg-white p-8 rounded-xl shadow-md space-y-6"
       >
-        <h2 className="text-xl font-semibold mb-4">📦 Shipping Information</h2>
+        <h2 className="text-2xl font-medium text-[#212121] mb-4">
+          📦 Shipping Information
+        </h2>
 
         <div>
-          <label className="block text-sm font-medium">Full Name</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Full Name
+          </label>
           <input
             type="text"
             {...register("fullName", { required: "Full Name is required" })}
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
           />
           {errors.fullName && (
-            <p className="text-red-500 text-sm">{errors.fullName.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.fullName.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Address</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Address
+          </label>
           <input
             type="text"
             {...register("address", { required: "Address is required" })}
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
           />
           {errors.address && (
-            <p className="text-red-500 text-sm">{errors.address.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.address.message}
+            </p>
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">City</label>
-          <input
-            type="text"
-            {...register("city", { required: "City is required" })}
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-          />
-          {errors.city && (
-            <p className="text-red-500 text-sm">{errors.city.message}</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              City
+            </label>
+            <input
+              type="text"
+              {...register("city", { required: "City is required" })}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
+            />
+            {errors.city && (
+              <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              ZIP Code
+            </label>
+            <input
+              type="text"
+              {...register("zip", {
+                required: "ZIP code is required",
+                pattern: {
+                  value: /^[0-9]{5,6}$/,
+                  message: "Enter a valid ZIP code",
+                },
+              })}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
+            />
+            {errors.zip && (
+              <p className="text-red-500 text-sm mt-1">{errors.zip.message}</p>
+            )}
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium">ZIP Code</label>
-          <input
-            type="text"
-            {...register("zip", {
-              required: "ZIP code is required",
-              pattern: {
-                value: /^[0-9]{5,6}$/,
-                message: "Enter a valid ZIP code",
-              },
-            })}
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
-          />
-          {errors.zip && (
-            <p className="text-red-500 text-sm">{errors.zip.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Country</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Country
+          </label>
           <input
             type="text"
             {...register("country", { required: "Country is required" })}
-            className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mt-1 focus:outline-none focus:ring-2 focus:ring-[#20B2AA]"
           />
           {errors.country && (
-            <p className="text-red-500 text-sm">{errors.country.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.country.message}
+            </p>
           )}
         </div>
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 transition"
+          className="w-full bg-[#20B2AA] hover:bg-[#199a96] text-white py-3 rounded-xl font-semibold transition"
         >
           Place Order
         </button>

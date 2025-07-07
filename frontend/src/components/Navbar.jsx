@@ -1,66 +1,101 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// Updated Navbar Component
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import { useWishlist } from "../context/WishlistContext";
-import { useNavigate } from "react-router-dom";
+import { ShoppingCart, Heart, User, Search } from "lucide-react";
 
 const Navbar = () => {
   const { cart } = useCart();
-  const { user, login, logout } = useUser();
+  const { user, logout } = useUser();
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
-    <nav className="flex justify-between p-4 shadow bg-white">
-      <Link to="/" className="font-bold text-xl">
-        MyShop
-      </Link>
-      <div className="flex gap-4">
+    <header className="sticky top-0 z-50 backdrop-blur-sm bg-white/70 border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link
-          to="/cart"
-          className="relative flex items-center gap-1 hover:underline"
+          to="/"
+          className="text-2xl font-bold tracking-tight text-[#212121] font-[Inter]"
         >
-          <span className="text-lg">🛒 Cart</span>
-          {cart.length > 0 && (
-            <span className="bg-red-600 text-white text-xs rounded-full px-2 py-0.5">
-              {cart.length}
-            </span>
-          )}
-        </Link>
-        <Link to="/wishlist">
-          <p className="hover:underline">Wishlist</p>
-          <p className="bg-pink-500 text-white px-2 py-0.5 rounded text-sm text-center">
-            {wishlist.length}
-          </p>
+          MyShop
         </Link>
 
-        {/* <Link to="/login">Login</Link> */}
-        {user ? (
-          <>
-            <span className="text-xl text-black">👋 {user.name}</span>
-            <button
-              onClick={logout}
-              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          // <button
-          //   onClick={() => login({ name: "Abhijeet" })}
-          //   className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded"
-          // >
-          //   Login
-          // </button>
+        <div className="flex items-center gap-6 text-[#212121]">
+          {/* Search Icon
           <button
-            onClick={() => navigate("/auth")}
-            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded"
+            onClick={() => setShowSearch(!showSearch)}
+            className="hover:text-[#20B2AA] transition"
           >
-            Login
-          </button>
-        )}
+            <Search size={22} />
+          </button> */}
+
+          {/* Wishlist */}
+          <Link
+            to="/wishlist"
+            className="relative hover:text-[#20B2AA] transition"
+          >
+            <Heart size={22} />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#20B2AA] text-white text-xs rounded-full px-1.5 py-0.5">
+                {wishlist.length}
+              </span>
+            )}
+          </Link>
+
+          {/* Cart */}
+          <Link to="/cart" className="relative hover:text-[#20B2AA] transition">
+            <ShoppingCart size={22} />
+            {cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#20B2AA] text-white text-xs rounded-full px-1.5 py-0.5">
+                {cart.length}
+              </span>
+            )}
+          </Link>
+
+          {/* User */}
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                className="flex items-center gap-1 hover:text-[#20B2AA]"
+              >
+                <User size={22} />
+                <span className="hidden sm:inline text-sm font-medium">
+                  {user.name}
+                </span>
+              </Link>
+              <button
+                onClick={logout}
+                className="text-sm text-white bg-[#D32F2F] rounded-full px-6 py-3 hover:underline"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate("/auth")}
+              className="text-sm text-[#20B2AA] hover:underline"
+            >
+              Login
+            </button>
+          )}
+        </div>
       </div>
-    </nav>
+
+      {/* Search Overlay */}
+      {showSearch && (
+        <div className="absolute top-full left-0 w-full bg-white shadow-lg z-50 p-4">
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#20B2AA] transition"
+          />
+        </div>
+      )}
+    </header>
   );
 };
 

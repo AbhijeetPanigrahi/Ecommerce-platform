@@ -1,15 +1,13 @@
-import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+// Updated Product Details Page
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useUser } from "../context/UserContext";
-import { Link } from "react-router-dom";
+
 const ProductPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-
-  // for (add to cart) and (wishlist) feature:
   const { cart, setCart } = useCart();
   const { addToWishlist } = useWishlist();
   const { user } = useUser();
@@ -24,47 +22,75 @@ const ProductPage = () => {
     fetchProduct();
   }, [id]);
 
-  if (!product) return <p className="text-center mt-10">Loading product...</p>;
-
-  // for (add to cart) and (wishlist) feature:
   const handleAddToCart = () => {
     if (!user) return navigate("/auth");
     setCart((prev) => [...prev, product]);
   };
+
   const handleAddToWishlist = () => {
     if (!user) return navigate("/auth");
     addToWishlist(product);
   };
-  const isInCart = cart.some((item) => item.id === product.id);
+
+  const isInCart = cart.some((item) => item.id === product?.id);
+
+  if (!product)
+    return (
+      <p className="text-center mt-10 text-gray-600">Loading product...</p>
+    );
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
-      <img
-        src={product.image}
-        alt={product.title}
-        className="w-40 h-40 object-contain mb-4"
-      />
-      <p className="text-lg text-gray-700 mb-2">${product.price}</p>
-      <p className="text-gray-600">{product.description}</p>
-      <div>
-        <button
-          className={`px-6 py-2 rounded ${
-            isInCart
-              ? "bg-green-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white`}
-          onClick={handleAddToCart}
-          disabled={isInCart}
-        >
-          {isInCart ? "Added to Cart" : "Add to Cart"}
-        </button>
-        <button
-          className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded"
-          onClick={handleAddToWishlist}
-        >
-          Add to Wishlist
-        </button>
+    <div className="max-w-6xl mx-auto p-6 bg-[#F8F8F8] rounded-2xl shadow-md mt-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        {/* Product Image */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="w-full h-[400px] object-contain rounded-xl"
+          />
+        </div>
+
+        {/* Product Info */}
+        <div className="space-y-4">
+          <h1 className="text-3xl font-semibold text-[#212121] leading-tight">
+            {product.title}
+          </h1>
+
+          <p className="text-xl text-[#20B2AA] font-bold">${product.price}</p>
+
+          <p className="text-gray-700 leading-relaxed text-sm">
+            {product.description}
+          </p>
+
+          <div className="flex gap-4 mt-6">
+            <button
+              className={`px-6 py-3 text-sm rounded-xl transition font-medium shadow-sm ${
+                isInCart
+                  ? "bg-green-500 text-white cursor-not-allowed"
+                  : "bg-[#20B2AA] hover:bg-[#199a96] text-white"
+              }`}
+              onClick={handleAddToCart}
+              disabled={isInCart}
+            >
+              {isInCart ? "Added to Cart" : "Add to Cart"}
+            </button>
+
+            <button
+              className="px-6 py-3 text-sm bg-pink-500 hover:bg-pink-600 text-white rounded-xl transition font-medium shadow-sm"
+              onClick={handleAddToWishlist}
+            >
+              ❤️ Wishlist
+            </button>
+          </div>
+
+          <Link
+            to="/"
+            className="block mt-6 text-sm text-[#20B2AA] hover:underline"
+          >
+            ← Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

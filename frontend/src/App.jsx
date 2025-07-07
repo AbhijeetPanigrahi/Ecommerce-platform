@@ -6,7 +6,7 @@ import React, { useState } from "react";
 // import CartPage from "./pages/CartPage";
 // import AuthPage from "./pages/AuthPage";
 // import WishlistPage from "./pages/WishlistPage";
-// import CheckoutPage from "./pages/CheckOutPage";
+// import CheckoutPage from "./pages/CheckoutPage";
 // import ThankYouPage from "./pages/ThankYouPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ShopLayout from "./layouts/ShopLayout";
@@ -20,6 +20,8 @@ const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const ThankYouPage = lazy(() => import("./pages/ThankYouPage"));
 const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
+const OrdersPage = lazy(() => import("./pages/OrdersPage"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 
 function App() {
   // const [cart, setCart] = useState([]);
@@ -36,18 +38,13 @@ function App() {
         <Route path="/thank-you" element={<ThankYouPage />} /> */}
         <Route path="/" element={<ShopLayout />}>
           <Route index element={<Home />} />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <CartPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Route>
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
