@@ -107,24 +107,32 @@ function Home() {
   return (
     <main className="bg-gradient-to-br from-[#dcc6ea] to-[#c1eaf0] min-h-screen px-4 py-10 sm:px-8">
       {/* Hero Section */}
-      <section className="rounded-3xl overflow-hidden relative bg-[#E0F2F1] mb-12 shadow-xl">
+      <section
+        className="relative w-full h-[60vh] md:h-[80vh] flex items-center justify-center rounded-3xl overflow-hidden mb-16 shadow-2xl transition-all duration-500 ease-in-out"
+        style={{
+          backgroundImage: "linear-gradient(to bottom right, #f0f0f0, #e0e0e0)",
+        }}
+      >
         <img
           src="/src/assets/hero_image.png"
-          alt="Hero"
-          className="w-full h-72 object-cover opacity-70"
+          alt="Curated Modern Essentials"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-75 md:opacity-90 transform scale-105 transition-transform duration-1000 ease-in-out group-hover:scale-100"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-[#212121] px-6">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-2 tracking-tight">
+
+        {/* Overlay for text readability and subtle depth */}
+        <div className="absolute inset-0 bg-black bg-opacity-20 flex flex-col items-center justify-center text-center px-6 md:px-12 z-10">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg animate-fade-in-up">
             Elevate Your Everyday
           </h1>
-          <p className="text-lg md:text-2xl mb-4 max-w-2xl text-[#444]">
-            Discover beautifully curated essentials designed for modern living.
+          <p className="text-lg sm:text-xl md:text-3xl text-gray-200 mb-8 max-w-3xl leading-relaxed animate-fade-in-up delay-200">
+            Discover beautifully curated essentials designed for **modern,
+            elevated living**.
           </p>
           <button
-            onClick={() => navigate("/")}
-            className="bg-[#20B2AA] hover:bg-[#179c97] text-white text-sm md:text-base px-6 py-3 rounded-full shadow-md transition font-semibold"
+            onClick={() => navigate("/products")}
+            className="bg-white text-[#212121] hover:bg-gray-100 px-8 py-4 rounded-full shadow-lg transition-all duration-300 ease-in-out font-bold text-lg md:text-xl transform hover:-translate-y-1 animate-fade-in-up delay-400 focus:outline-none focus:ring-4 focus:ring-[#20B2AA] focus:ring-opacity-50"
           >
-            Explore Collection
+            Explore the Collection
           </button>
         </div>
       </section>

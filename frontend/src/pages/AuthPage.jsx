@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import { signupUser, loginUser } from "../utils/api";
 
 function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,17 +17,42 @@ function AuthPage() {
   const navigate = useNavigate();
 
   // Simulated backend-ready submit handler
-  const onSubmit = (data) => {
-    if (isLogin) {
-      // In future: call backend login API here
-      // console.log("Logging in with:", data);
-      login({ name: "User", email: data.email }); // no name during login
-    } else {
-      // In future: call backend signup API here
-      // console.log("Registering with:", data);
-      login({ name: data.name, email: data.email }); // get name from signup form
+  const onSubmit = async (data) => {
+    // if (isLogin) {
+    //   // In future: call backend login API here
+    //   // console.log("Logging in with:", data);
+    //   login({ name: "User", email: data.email }); // no name during login
+    // } else {
+    //   // In future: call backend signup API here
+    //   // console.log("Registering with:", data);
+    //   login({ name: data.name, email: data.email }); // get name from signup form
+    // }
+    try {
+      let response;
+      if (isLogin) {
+        response = await loginUser({
+          email: data.email,
+          password: data.password,
+        });
+      } else {
+        response = await signupUser({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        });
+      }
+
+      if (response.token && response.user) {
+        login(response.user, response.token);
+        navigate("/");
+      } else {
+        console.log("Signup/Login failed. Server response:", response); // 👈 Add this line
+        alert(response.message);
+      }
+    } catch (error) {
+      console.error("Auth Error:", error);
+      alert("Server error. Try again later.");
     }
-    navigate("/");
   };
 
   // This keeps track of whatever the user types in the "password" input.
