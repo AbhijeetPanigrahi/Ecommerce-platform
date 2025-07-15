@@ -190,11 +190,7 @@ This will ensure the DB exists and is ready for connections.
    mongodb+srv://myuser:<password>@cluster0.abcd123.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
    ```
 
-4. Replace `<password>` with your real password. Also, you can append your DB name:
-
-   ```
-   mongodb+srv://myuser:mypassword123@cluster0.abcd123.mongodb.net/ecommerceDB?retryWrites=true&w=majority&appName=Cluster0
-   ```
+4. Replace `<password>` with your real password. Also, you can append your DB name
 
 ---
 
@@ -203,7 +199,7 @@ This will ensure the DB exists and is ready for connections.
 ```
 env
 CopyEdit
-MONGO_URI=mongodb+srv://myuser:mypassword123@cluster0.abcd123.mongodb.net/ecommerceDB?retryWrites=true&w=majority&appName=Cluster0
+MONGO_URI=mongodb+srv://myuser:<password>@cluster0.abcd123.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 PORT=5000
 ```
 
@@ -523,9 +519,9 @@ Once these endpoints are working:
 Your `.env` file should contain **three environment variables**:
 
 ```
-MONGO_URI=mongodb+srv://myuser:your_password@cluster0.typ81pr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGO_URI=......
 PORT=5000
-JWT_SECRET=mySuperSecretKey123
+JWT_SECRET=.....(anything)
 ```
 
 > 🔐 Replace mySuperSecretKey123 with a strong, random secret in real projects!
