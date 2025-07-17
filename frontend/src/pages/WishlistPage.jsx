@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useWishlist } from "../context/WishlistContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useCart } from "../context/CartContext";
+import { fetchWishlist, removeWishlistItem } from "../utils/api"; // ✅ Import backend functions
 
 const WishlistPage = () => {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { user } = useUser();
   const navigate = useNavigate();
+
+  // ✅ Load wishlist from backend
+  useEffect(() => {
+    // No need to manually fetch or mutate wishlist here; context handles it.
+  }, [user]);
+
+  const handleRemove = async (id) => {
+    await removeWishlistItem(id);
+    removeFromWishlist(id);
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-[#FAFAFA] min-h-screen">
@@ -61,7 +72,7 @@ const WishlistPage = () => {
                   </button>
                   <button
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm"
-                    onClick={() => removeFromWishlist(item.id)}
+                    onClick={() => handleRemove(item.id)}
                   >
                     Remove
                   </button>

@@ -1,6 +1,6 @@
-// utils/api.js (create this new file)
-const API_BASE = "http://localhost:5000/api"; // adjust if needed
+const API_BASE = "http://localhost:5000/api";
 
+// Existing Auth APIs
 export const signupUser = async (data) => {
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
@@ -15,6 +15,72 @@ export const loginUser = async (data) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+  });
+  return await res.json();
+};
+
+// ---------------------------    After Backend Setup ---------------------------------
+
+// 🛒 Wishlist APIs
+export const fetchWishlist = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/wishlist`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return await res.json();
+};
+
+export const removeWishlistItem = async (productId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/wishlist/remove/${productId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return await res.json();
+};
+
+// 📦 Orders API
+export const fetchOrders = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/orders`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return await res.json();
+};
+
+////////////////////////////////////////////////////
+
+const getToken = () => localStorage.getItem("token");
+
+// ✅ Add to cart
+export const addToCartAPI = async (product) => {
+  const res = await fetch(`${API_BASE}/cart/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(product),
+  });
+  return res.json();
+};
+
+// ✅ Get cart
+export const getCartAPI = async () => {
+  const res = await fetch(`${API_BASE}/cart`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return res.json();
+};
+
+export const removeFromCartAPI = async (itemId) => {
+  const res = await fetch(`${API_BASE}/cart/remove/${itemId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
   });
   return await res.json();
 };

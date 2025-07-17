@@ -67,7 +67,7 @@ const Navbar = () => {
                   {user.name}
                 </span>
               </Link> */}
-              <div class="relative group">
+              <div className="relative group">
                 <Link
                   to="/profile"
                   className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"

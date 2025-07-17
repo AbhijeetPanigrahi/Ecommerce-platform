@@ -8,7 +8,7 @@ import { useUser } from "../context/UserContext";
 const ProductPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const { cart, setCart } = useCart();
+  const { cart, setCart, addToCart } = useCart();
   const { addToWishlist } = useWishlist();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -24,7 +24,13 @@ const ProductPage = () => {
 
   const handleAddToCart = () => {
     if (!user) return navigate("/auth");
-    setCart((prev) => [...prev, product]);
+    // setCart((prev) => [...prev, product]);
+    addToCart({
+      productId: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+    });
   };
 
   const handleAddToWishlist = () => {
@@ -32,7 +38,7 @@ const ProductPage = () => {
     addToWishlist(product);
   };
 
-  const isInCart = cart.some((item) => item.id === product?.id);
+  const isInCart = cart.some((item) => item.productId === product?.id);
 
   if (!product)
     return (

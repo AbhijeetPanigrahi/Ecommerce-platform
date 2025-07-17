@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
+import { removeFromCartAPI, getCartAPI } from "../utils/api"; // ✅ Add this at the top
 
 const CartPage = () => {
   const { cart, setCart } = useCart();
@@ -9,9 +10,14 @@ const CartPage = () => {
   const navigate = useNavigate();
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const handleRemoveFromCart = (removeItemId) => {
-    const updatedCart = cart.filter((item) => item.id !== removeItemId);
-    setCart(updatedCart);
+  const handleRemoveFromCart = async (removeItemId) => {
+    try {
+      await removeFromCartAPI(removeItemId);
+      const updatedCart = await getCartAPI();
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Remove failed", err);
+    }
   };
 
   return (
@@ -38,7 +44,7 @@ const CartPage = () => {
             <ul className="space-y-4">
               {cart.map((item) => (
                 <li
-                  key={item.id}
+                  key={item._id}
                   className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition"
                 >
                   <div className="flex items-center gap-5">
@@ -58,7 +64,7 @@ const CartPage = () => {
                   </div>
 
                   <button
-                    onClick={() => handleRemoveFromCart(item.id)}
+                    onClick={() => handleRemoveFromCart(item._id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition text-sm font-medium"
                   >
                     Remove

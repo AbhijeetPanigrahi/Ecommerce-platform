@@ -46,11 +46,14 @@ function AuthPage() {
         login(response.user, response.token);
         navigate("/");
       } else {
-        console.log("Signup/Login failed. Server response:", response); // 👈 Add this line
+        console.log(
+          "Signup/Login failed. Server response:",
+          JSON.stringify(response)
+        );
         alert(response.message);
       }
     } catch (error) {
-      console.error("Auth Error:", error);
+      console.error("Auth Error:", error?.message || error);
       alert("Server error. Try again later.");
     }
   };

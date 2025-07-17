@@ -40,7 +40,14 @@ function ProductCard({
               ? "bg-[#ECECEC] text-gray-500 cursor-not-allowed"
               : "bg-[#20B2AA] text-white hover:bg-[#199a96]"
           }`}
-          onClick={onAddToCart}
+          onClick={() =>
+            onAddToCart({
+              productId,
+              title,
+              price,
+              image,
+            })
+          }
           disabled={isInCart}
         >
           {isInCart ? "✓ Added to Cart" : "Add to Cart"}

@@ -16,7 +16,7 @@ function Home() {
   const itemsPerPage = 6;
   const observerRef = useRef();
   // =============================== Contexts ===============================
-  const { cart, setCart } = useCart();
+  const { cart, addToCart } = useCart();
   const { addToWishlist } = useWishlist();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -87,11 +87,7 @@ function Home() {
 
   // =============================== Handlers ===============================
   const handleAddToCart = (product) => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    setCart((prevCart) => [...prevCart, product]);
+    addToCart(product);
   };
 
   const handleSearchChange = (e) => {
