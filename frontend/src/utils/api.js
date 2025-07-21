@@ -84,3 +84,24 @@ export const removeFromCartAPI = async (itemId) => {
   });
   return await res.json();
 };
+
+export const clearCartAPI = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE}/cart/clear`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return await res.json();
+};
+
+export const placeOrderAPI = async (orderData, token) => {
+  const res = await fetch("http://localhost:5000/api/orders/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(orderData),
+  });
+  return await res.json();
+};

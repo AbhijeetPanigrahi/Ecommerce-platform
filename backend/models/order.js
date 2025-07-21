@@ -20,6 +20,10 @@ const orderSchema = new mongoose.Schema(
     },
     items: [orderItemSchema],
     totalAmount: Number,
+    status: {
+      type: String,
+      default: "Placed",
+    },
     orderDate: {
       type: Date,
       default: Date.now,

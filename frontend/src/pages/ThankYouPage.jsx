@@ -17,8 +17,8 @@ const ThankYouPage = () => {
   }, []);
 
   return (
-    <div className="max-w-xl mx-auto mt-24 text-center px-6 bg-gradient-to-br from-[#FAFAFA] to-[#F0F0F0] p-8 rounded-3xl shadow-xl border border-gray-200">
-      <h1 className="text-3xl md:text-4xl font-extrabold text-green-600 mb-6">
+    <div className="max-w-xl mx-auto mt-16 sm:mt-24 text-center px-4 sm:px-6 bg-gradient-to-br from-[#FAFAFA] to-[#F0F0F0] p-4 sm:p-8 rounded-3xl shadow-xl border border-gray-200">
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-green-600 mb-6">
         🎉 Thank You for Your Order!
       </h1>
 
@@ -41,7 +41,7 @@ const ThankYouPage = () => {
 
       <Link
         to="/"
-        className="inline-block bg-[#20B2AA] hover:bg-[#199a96] text-white px-6 py-3 rounded-xl shadow-md transition font-medium"
+        className="inline-block w-full sm:w-auto bg-[#20B2AA] hover:bg-[#199a96] text-white px-6 py-3 rounded-xl shadow-md transition font-medium"
       >
         Continue Shopping
       </Link>

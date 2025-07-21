@@ -28,6 +28,7 @@ export const UserProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    // Do NOT call setCart or useCart here!
   };
 
   return (

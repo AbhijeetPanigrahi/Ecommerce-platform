@@ -19,11 +19,13 @@ const {
   addToCart,
   getCart,
   removeFromCart,
+  clearCart,
 } = require("../controllers/cartController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/add", authMiddleware, addToCart);
 router.get("/", authMiddleware, getCart);
 router.delete("/remove/:id", authMiddleware, removeFromCart);
+router.delete("/clear", authMiddleware, clearCart);
 
 module.exports = router;

@@ -1,37 +1,30 @@
-// Updated Navbar Component
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import { useWishlist } from "../context/WishlistContext";
-import { ShoppingCart, Heart, User, Search } from "lucide-react";
+import { ShoppingCart, Heart, User } from "lucide-react";
 
 const Navbar = () => {
-  const { cart } = useCart();
+  const { cart, setCart } = useCart();
   const { user, logout } = useUser();
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
-  const [showSearch, setShowSearch] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-sm bg-white/70 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link
-          to="/"
-          className="text-2xl font-bold tracking-tight text-[#212121] font-[Inter]"
-        >
-          MyShop
-        </Link>
-
-        <div className="flex items-center gap-6 text-[#212121]">
-          {/* Search Icon
-          <button
-            onClick={() => setShowSearch(!showSearch)}
-            className="hover:text-[#20B2AA] transition"
+        {/* Platform name always visible, centered on mobile */}
+        <div className="flex-1 flex justify-center md:justify-start">
+          <Link
+            to="/"
+            className="text-2xl font-bold tracking-tight text-[#212121] font-[Inter]"
           >
-            <Search size={22} />
-          </button> */}
-
+            BuyBuff
+          </Link>
+        </div>
+        {/* Desktop Nav (hidden on mobile) */}
+        <div className="hidden md:flex items-center gap-6 text-[#212121]">
           {/* Wishlist */}
           <Link
             to="/wishlist"
@@ -44,7 +37,6 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-
           {/* Cart */}
           <Link to="/cart" className="relative hover:text-[#20B2AA] transition">
             <ShoppingCart size={22} />
@@ -54,19 +46,9 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-
           {/* User */}
           {user ? (
             <div className="flex items-center gap-2">
-              {/* <Link
-                to="/profile"
-                className="flex items-center gap-1 hover:text-[#20B2AA]"
-              >
-                <User size={22} />
-                <span className="hidden sm:inline text-sm font-medium">
-                  {user.name}
-                </span>
-              </Link> */}
               <div className="relative group">
                 <Link
                   to="/profile"
@@ -77,8 +59,6 @@ const Navbar = () => {
                     className="text-[#212121] group-hover:text-[#20B2AA] transition-colors"
                   />
                 </Link>
-
-                {/* User Name Popover on Hover */}
                 <div
                   className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max 
                   bg-white rounded-lg shadow-xl py-2 px-4
@@ -93,7 +73,11 @@ const Navbar = () => {
                 </div>
               </div>
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  setCart([]);
+                  localStorage.removeItem("cart");
+                }}
                 className="text-sm text-white bg-[#D32F2F] rounded-full px-6 py-3 hover:underline"
               >
                 Logout
@@ -109,17 +93,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-
-      {/* Search Overlay */}
-      {showSearch && (
-        <div className="absolute top-full left-0 w-full bg-white shadow-lg z-50 p-4">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#20B2AA] transition"
-          />
-        </div>
-      )}
     </header>
   );
 };

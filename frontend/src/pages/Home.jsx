@@ -12,9 +12,11 @@ function Home() {
   const [visibleProducts, setVisibleProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [recentlyAdded, setRecentlyAdded] = useState([]); // <-- new state
 
   const itemsPerPage = 6;
   const observerRef = useRef();
+  const productsRef = useRef(null);
   // =============================== Contexts ===============================
   const { cart, addToCart } = useCart();
   const { addToWishlist } = useWishlist();
@@ -88,6 +90,10 @@ function Home() {
   // =============================== Handlers ===============================
   const handleAddToCart = (product) => {
     addToCart(product);
+    setRecentlyAdded((prev) => [...prev, product.id]);
+    setTimeout(() => {
+      setRecentlyAdded((prev) => prev.filter((id) => id !== product.id));
+    }, 1500);
   };
 
   const handleSearchChange = (e) => {
@@ -125,7 +131,11 @@ function Home() {
             elevated living**.
           </p>
           <button
-            onClick={() => navigate("/products")}
+            onClick={() => {
+              if (productsRef.current) {
+                productsRef.current.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
             className="bg-white text-[#212121] hover:bg-gray-100 px-8 py-4 rounded-full shadow-lg transition-all duration-300 ease-in-out font-bold text-lg md:text-xl transform hover:-translate-y-1 animate-fade-in-up delay-400 focus:outline-none focus:ring-4 focus:ring-[#20B2AA] focus:ring-opacity-50"
           >
             Explore the Collection
@@ -165,7 +175,10 @@ function Home() {
       </div>
 
       {/* Product Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+      <section
+        ref={productsRef}
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10"
+      >
         {visibleProducts.map((product, index) => (
           <div
             key={product.id}
@@ -176,7 +189,10 @@ function Home() {
               title={product.title}
               price={product.price}
               image={product.image}
-              isInCart={cart.some((item) => item.id === product.id)}
+              isInCart={
+                cart.some((item) => item.id === product.id) ||
+                recentlyAdded.includes(product.id)
+              }
               onAddToCart={() => handleAddToCart(product)}
               onAddToWishlist={() => {
                 if (!user) return navigate("/auth");

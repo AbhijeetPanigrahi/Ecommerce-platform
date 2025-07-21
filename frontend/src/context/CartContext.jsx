@@ -17,6 +17,14 @@ export const CartProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (cart && cart.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } else {
+      localStorage.removeItem("cart");
+    }
+  }, [cart]);
+
+  useEffect(() => {
     const loadCart = async () => {
       try {
         const items = await getCartAPI();
@@ -28,6 +36,11 @@ export const CartProvider = ({ children }) => {
 
     if (user?.name || user?.email || user?.userId) {
       loadCart(); // ✅ only when user is present
+    } else {
+      // Load from localStorage if not logged in
+      const storedCart = localStorage.getItem("cart");
+      if (storedCart) setCart(JSON.parse(storedCart));
+      else setCart([]);
     }
   }, [user?.name || user?.email || user?.userId]); // ✅ re-run only after user is loaded
 

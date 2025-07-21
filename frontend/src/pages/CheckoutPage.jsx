@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useUser } from "../context/UserContext";
+import { placeOrderAPI, clearCartAPI } from "../utils/api";
 
 const CheckoutPage = () => {
   const { cart, setCart } = useCart();
@@ -17,50 +18,43 @@ const CheckoutPage = () => {
     formState: { errors },
   } = useForm();
 
-  // 🔄 Order Status Generator
-  const getRandomStatus = () => {
-    const statuses = ["Processing", "Shipped", "Delivered"];
-    const randomIndex = Math.floor(Math.random() * statuses.length);
-    return statuses[randomIndex];
-  };
+  // Remove the onSubmit function and all localStorage order logic
 
-  const onSubmit = (formData) => {
-    const newOrder = {
-      id: Date.now(),
+  // Only use this for placing orders:
+  const handlePlaceOrder = async (formData) => {
+    const token = localStorage.getItem("token");
+    const orderData = {
       items: cart,
-      total: totalPrice,
-      date: new Date().toLocaleString(),
-      userEmail: user?.name,
-      shipping: formData,
-      status: getRandomStatus(),
+      totalAmount: totalPrice,
+      shipping: formData, // include shipping info if needed
     };
-
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const updatedOrders = [...existingOrders, newOrder];
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
-
-    setCart([]); // Clear cart
-    navigate("/thank-you");
+    const res = await placeOrderAPI(orderData, token);
+    if (res && res.order) {
+      await clearCartAPI(); // <-- clear backend cart
+      setCart([]);
+      localStorage.removeItem("cart");
+      navigate("/thank-you");
+    }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-8 bg-[#FAFAFA] rounded-2xl shadow-md mt-10">
-      <h1 className="text-3xl font-semibold text-[#212121] mb-8">
+    <div className="max-w-5xl mx-auto p-4 sm:p-8 bg-[#FAFAFA] rounded-2xl shadow-md mt-6 sm:mt-10">
+      <h1 className="text-3xl font-semibold text-[#212121] mb-8 text-center sm:text-left">
         🧾 Checkout
       </h1>
 
       {/* 🛒 Cart Summary */}
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-10">
+      <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm mb-8 sm:mb-10">
         <ul className="divide-y divide-gray-200">
-          {cart.map((item) => (
+          {cart.map((item, idx) => (
             <li
-              key={item.id}
-              className="py-4 flex justify-between items-center"
+              key={item.productId || item.id || idx}
+              className="py-4 flex flex-col sm:flex-row justify-between items-center"
             >
-              <span className="font-medium text-gray-800 truncate w-3/4">
+              <span className="font-medium text-gray-800 truncate w-full sm:w-3/4 text-center sm:text-left">
                 {item.title}
               </span>
-              <span className="text-[#20B2AA] font-semibold">
+              <span className="text-[#20B2AA] font-semibold mt-2 sm:mt-0">
                 ${item.price.toFixed(2)}
               </span>
             </li>
@@ -74,10 +68,10 @@ const CheckoutPage = () => {
 
       {/* 📦 Shipping Form */}
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-8 rounded-xl shadow-md space-y-6"
+        onSubmit={handleSubmit(handlePlaceOrder)}
+        className="bg-white p-4 sm:p-8 rounded-xl shadow-md space-y-6"
       >
-        <h2 className="text-2xl font-medium text-[#212121] mb-4">
+        <h2 className="text-2xl font-medium text-[#212121] mb-4 text-center sm:text-left">
           📦 Shipping Information
         </h2>
 
@@ -113,7 +107,7 @@ const CheckoutPage = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               City
@@ -167,7 +161,7 @@ const CheckoutPage = () => {
 
         <button
           type="submit"
-          className="w-full bg-[#20B2AA] hover:bg-[#199a96] text-white py-3 rounded-xl font-semibold transition"
+          className="w-full sm:w-auto bg-[#20B2AA] hover:bg-[#199a96] text-white py-3 px-8 rounded-xl font-semibold transition mt-2"
         >
           Place Order
         </button>

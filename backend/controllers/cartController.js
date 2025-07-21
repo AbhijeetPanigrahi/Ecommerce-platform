@@ -60,3 +60,15 @@ exports.removeFromCart = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Clear all items from cart for the logged-in user
+exports.clearCart = async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    await CartItem.deleteMany({ userId });
+    res.json({ message: "Cart cleared" });
+  } catch (err) {
+    console.error("Clear Cart Error:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

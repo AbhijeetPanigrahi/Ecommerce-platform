@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* About Section */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">MyShop</h3>
+          <h3 className="text-lg font-semibold mb-4">BuyBuff</h3>
           <p className="text-sm leading-relaxed">
             Discover curated collections of high-quality fashion, electronics,
             and lifestyle essentials. Designed with simplicity & soul.
@@ -61,7 +61,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="mt-10 border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center text-xs">
-        <p>© 2025 MyShop. All rights reserved.</p>
+        <p>© 2025 BuyBuff. All rights reserved.</p>
         <div className="flex gap-4 mt-4 md:mt-0">
           <Facebook className="hover:text-white cursor-pointer" size={18} />
           <Twitter className="hover:text-white cursor-pointer" size={18} />

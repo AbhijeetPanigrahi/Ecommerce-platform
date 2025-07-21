@@ -23,7 +23,7 @@ const WishlistPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-[#FAFAFA] min-h-screen">
-      <h1 className="text-3xl font-semibold text-[#212121] mb-8">
+      <h1 className="text-3xl font-semibold text-[#212121] mb-8 text-center sm:text-left">
         💖 Your Wishlist
       </h1>
 
@@ -45,16 +45,16 @@ const WishlistPage = () => {
             {wishlist.map((item) => (
               <li
                 key={item.id}
-                className="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition"
+                className="flex flex-col sm:flex-row justify-between items-center p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition gap-4 sm:gap-0"
               >
-                <div className="flex items-center gap-5">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="h-20 w-20 object-contain rounded-xl border"
+                    className="h-20 w-20 object-contain rounded-xl border mb-2 sm:mb-0"
                   />
-                  <div>
-                    <h2 className="text-md font-semibold text-[#212121] line-clamp-2 max-w-xs">
+                  <div className="flex-1 text-center sm:text-left">
+                    <h2 className="text-md font-semibold text-[#212121] line-clamp-2 max-w-xs mx-auto sm:mx-0">
                       {item.title}
                     </h2>
                     <p className="text-sm text-[#616161] mt-1">
@@ -62,16 +62,15 @@ const WishlistPage = () => {
                     </p>
                   </div>
                 </div>
-
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                   <button
-                    className="bg-[#20B2AA] hover:bg-[#199a96] text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm"
+                    className="bg-[#20B2AA] hover:bg-[#199a96] text-white px-4 sm:px-6 py-2 sm:py-2 rounded-xl text-sm font-medium shadow-sm w-full sm:w-auto"
                     onClick={() => addToCart(item)}
                   >
                     Add to Cart
                   </button>
                   <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm"
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 sm:px-6 py-2 sm:py-2 rounded-xl transition text-sm font-medium w-full sm:w-auto mt-2 sm:mt-0"
                     onClick={() => handleRemove(item.id)}
                   >
                     Remove
@@ -91,7 +90,7 @@ const WishlistPage = () => {
           </p>
           <button
             onClick={() => navigate("/auth")}
-            className="bg-[#20B2AA] hover:bg-[#199a96] text-white px-6 py-3 rounded-xl font-medium transition shadow-sm"
+            className="bg-[#20B2AA] hover:bg-[#199a96] text-white px-6 py-3 rounded-xl font-medium transition shadow-sm w-full max-w-xs mx-auto"
           >
             Login / Signup
           </button>
