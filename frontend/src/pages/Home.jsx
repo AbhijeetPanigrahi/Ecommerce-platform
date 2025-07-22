@@ -5,6 +5,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import Spinner from "../components/Spinner";
+import heroImage from "../assets/hero_image.png";
 
 function Home() {
   // =============================== Infinite Scroll State ===============================
@@ -116,7 +117,7 @@ function Home() {
         }}
       >
         <img
-          src="/src/assets/hero_image.png"
+          src={heroImage}
           alt="Curated Modern Essentials"
           className="absolute inset-0 w-full h-full object-cover object-center opacity-75 md:opacity-90 transform scale-105 transition-transform duration-1000 ease-in-out group-hover:scale-100"
         />
