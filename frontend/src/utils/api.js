@@ -24,7 +24,7 @@ export const loginUser = async (data) => {
 // 🛒 Wishlist APIs
 export const fetchWishlist = async () => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/wishlist`, {
+  const res = await fetch(`${API_BASE}/api/wishlist`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return await res.json();
@@ -32,7 +32,7 @@ export const fetchWishlist = async () => {
 
 export const removeWishlistItem = async (productId) => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/wishlist/remove/${productId}`, {
+  const res = await fetch(`${API_BASE}/api/wishlist/remove/${productId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -42,7 +42,7 @@ export const removeWishlistItem = async (productId) => {
 // 📦 Orders API
 export const fetchOrders = async () => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/orders`, {
+  const res = await fetch(`${API_BASE}/api/orders`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return await res.json();
@@ -54,7 +54,7 @@ const getToken = () => localStorage.getItem("token");
 
 // ✅ Add to cart
 export const addToCartAPI = async (product) => {
-  const res = await fetch(`${API_BASE}/cart/add`, {
+  const res = await fetch(`${API_BASE}/api/cart/add`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export const addToCartAPI = async (product) => {
 
 // ✅ Get cart
 export const getCartAPI = async () => {
-  const res = await fetch(`${API_BASE}/cart`, {
+  const res = await fetch(`${API_BASE}/api/cart`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
     },
@@ -76,7 +76,7 @@ export const getCartAPI = async () => {
 };
 
 export const removeFromCartAPI = async (itemId) => {
-  const res = await fetch(`${API_BASE}/cart/remove/${itemId}`, {
+  const res = await fetch(`${API_BASE}/api/cart/remove/${itemId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${getToken()}`,
@@ -87,7 +87,7 @@ export const removeFromCartAPI = async (itemId) => {
 
 export const clearCartAPI = async () => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${API_BASE}/cart/clear`, {
+  const res = await fetch(`${API_BASE}/api/cart/clear`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -95,8 +95,7 @@ export const clearCartAPI = async () => {
 };
 
 export const placeOrderAPI = async (orderData, token) => {
-  // const res = await fetch("http://localhost:5000/api/orders/create", {
-  const res = await fetch(`${API_BASE}/orders/create`, {
+  const res = await fetch(`${API_BASE}/api/orders/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
