@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
 
 // Existing Auth APIs
 export const signupUser = async (data) => {
@@ -95,7 +95,8 @@ export const clearCartAPI = async () => {
 };
 
 export const placeOrderAPI = async (orderData, token) => {
-  const res = await fetch("http://localhost:5000/api/orders/create", {
+  // const res = await fetch("http://localhost:5000/api/orders/create", {
+  const res = await fetch(`${API_BASE}/orders/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
