@@ -194,7 +194,10 @@ function Home() {
                 cart.some((item) => item.id === product.id) ||
                 recentlyAdded.includes(product.id)
               }
-              isInWishlist={wishlist.some((item) => item.id === product.id)}
+              isInWishlist={wishlist.some(
+                (item) =>
+                  item.id === product.id || item.productId === product.id
+              )}
               onAddToCart={() => handleAddToCart(product)}
               onAddToWishlist={() => {
                 if (!user) return navigate("/auth");

@@ -39,6 +39,14 @@ export const WishlistProvider = ({ children }) => {
       navigate("/auth");
       return;
     }
+
+    // Check if already in wishlist
+    const alreadyExists = wishlist.some(
+      (item) => item.id === product.id || item.productId === product.id
+    );
+
+    if (alreadyExists) return; // Prevent duplicate add
+
     try {
       // Map product.id to productId for backend compatibility
       const productToSend = {
