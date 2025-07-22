@@ -11,7 +11,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const app = express();
 app.use(
   cors({
-    origin: ["buy-buff-ecommerce-platform.vercel.app", "http://localhost:3000"],
+    origin: ["https://buy-buff-ecommerce-platform.vercel.app", "http://localhost:3000"],
     credentials: true,
   })
 );
