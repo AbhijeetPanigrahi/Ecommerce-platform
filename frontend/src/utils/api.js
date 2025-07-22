@@ -96,6 +96,7 @@ export const clearCartAPI = async () => {
 
 export const placeOrderAPI = async (orderData, token) => {
   const res = await fetch(`${API_BASE}/api/orders/create`, {
+    // Should be `${API_BASE}/api/orders/create`
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -51,7 +51,7 @@ export const WishlistProvider = ({ children }) => {
       await fetch(
         `${
           import.meta.env.VITE_API_BASE || "http://localhost:5000/api"
-        }/wishlist/add`,
+        }/api/wishlist/add`,
         {
           method: "POST",
           headers: {
