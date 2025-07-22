@@ -20,7 +20,7 @@ function Home() {
   const productsRef = useRef(null);
   // =============================== Contexts ===============================
   const { cart, addToCart } = useCart();
-  const { addToWishlist } = useWishlist();
+  const { wishlist, addToWishlist } = useWishlist();
   const { user } = useUser();
   const navigate = useNavigate();
 
