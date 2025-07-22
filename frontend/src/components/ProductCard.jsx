@@ -11,6 +11,7 @@ function ProductCard({
   onAddToCart,
   isInCart,
   onAddToWishlist,
+  isInWishlist,
 }) {
   return (
     <div className="bg-[#F3F4F6] rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden relative group">
@@ -55,10 +56,16 @@ function ProductCard({
 
         {/* Wishlist Button */}
         <button
-          className="w-full mt-3 py-2 bg-white border border-[#20B2AA] text-[#20B2AA] rounded-xl font-medium text-sm hover:bg-[#E6E6FA] transition-all duration-300 flex justify-center items-center gap-2"
+          className={`w-full mt-3 py-2 rounded-xl font-medium text-sm transition-all duration-300 flex justify-center items-center gap-2 ${
+            isInWishlist
+              ? "bg-[#E6E6FA] text-[#8A2BE2] border border-[#8A2BE2]"
+              : "bg-white border border-[#20B2AA] text-[#20B2AA] hover:bg-[#E6E6FA]"
+          }`}
           onClick={onAddToWishlist}
+          disabled={isInWishlist}
         >
-          <Heart size={16} /> Wishlist
+          <Heart size={16} fill={isInWishlist ? "#8A2BE2" : "none"} />
+          {isInWishlist ? "In Wishlist" : "Wishlist"}
         </button>
       </div>
 
